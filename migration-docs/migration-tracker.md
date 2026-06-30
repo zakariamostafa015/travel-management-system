@@ -6,9 +6,9 @@ Last updated: 2026-06-30
 
 Start every new context by reading this file and `migration-docs/migration-plan.md`.
 
-Current stop point: Phase 2 is complete. Review and push the shared API foundation before starting domain migration.
+Current stop point: Phase 3 is complete. Review and push the domain migration before starting EF Core infrastructure.
 
-Next phase to start only after Phase 2 is reviewed and pushed: Phase 3 - Domain migration.
+Next phase to start only after Phase 3 is reviewed and pushed: Phase 4 - Infrastructure EF Core.
 
 ## Phase Status
 
@@ -16,7 +16,7 @@ Next phase to start only after Phase 2 is reviewed and pushed: Phase 3 - Domain 
 |---:|---|---|---|---|
 | 1 | Project setup and migration docs | Done | 2026-06-30 | Created .NET 8 API/Application/Infrastructure/Domain shell, added migration docs inside the new `src` repo, created API-only `TravelToursWebsite.Api.sln` and `TravelToursWebsite.Api.slnx`, added `.gitignore`, and verified build with `dotnet build src\TravelToursWebsite.Api\TravelToursWebsite.Api.csproj --no-restore -m:1`. |
 | 2 | Shared API foundation | Done | 2026-06-30 | Added API response model, validation error response shaping, RFC 7807 ProblemDetails customization, global exception handler, Swagger/OpenAPI with API versioning, CORS allowlist config, fixed-window rate limiting, health checks, and versioned `/api/v1` info endpoint. Verified build and user smoke-tested `https://localhost:7157/api/v1`. |
-| 3 | Domain migration | Not Started |  | Move/normalize entities/enums into Domain. |
+| 3 | Domain migration | Done | 2026-06-30 | Added domain entities/enums/configuration models under `TravelToursWebsite.Domain`, including `TeamMember`; preserved legacy model shape and verified no old Core/Data namespace references. |
 | 4 | Infrastructure EF Core | Not Started |  | Port DbContext and EF configuration to .NET 8. |
 | 5 | Application contracts | Not Started |  | Add DTOs, validators, manual mapping, query contracts. |
 | 6 | Auth API | Not Started |  | Add JWT auth, policies, refresh token support if needed. |
@@ -74,3 +74,23 @@ Next phase to start only after Phase 2 is reviewed and pushed: Phase 3 - Domain 
 - Result: build succeeded with 0 warnings and 0 errors.
 - Note: if the API is running, normal Debug output can be locked by `TravelToursWebsite.Api.exe`; build to a temp output folder or stop the process before rebuilding.
 - User smoke test: `GET https://localhost:7157/api/v1` returned 200 with `success: true`, `status: Phase 2 foundation ready`, and `api-supported-versions: 1.0`.
+## Phase 3 Checklist
+
+- [x] Add `Entities` folder to Domain.
+- [x] Add `Enums` folder to Domain.
+- [x] Add `Configuration` folder to Domain.
+- [x] Port tour, itinerary, image, spot, and category entities.
+- [x] Port blog, blog category, translation, and image entities.
+- [x] Port contact inquiry and booking request entities.
+- [x] Port user, role, language, settings, department, and team member models.
+- [x] Move `TeamMember` out of old `Data.TempModels` shape.
+- [x] Verify Domain has no old MVC/Core/Data namespace references.
+- [x] Verify solution build.
+- [x] Mark Phase 3 as Done.
+
+## Phase 3 Verification
+
+- Command: `rg "TravelToursWebsite\.Core|TravelToursWebsite\.Data|TempModels" TravelToursWebsite.Domain`
+- Result: no matches.
+- Command: `dotnet build TravelToursWebsite.Api.sln --no-restore -m:1`
+- Result: build succeeded with 0 warnings and 0 errors.
