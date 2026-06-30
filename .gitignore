@@ -1,0 +1,47 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Environment/local secrets
+.env
+.env.*
+!/.env.example
+appsettings.Local.json
+appsettings.*.Local.json
+
+# Publish output
+[Pp]ublish/
+PubTmp/
+
+# Test results
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# NuGet
+*.nupkg
+packages/
+
+# OS files
+.DS_Store
+Thumbs.db
