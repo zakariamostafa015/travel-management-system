@@ -6,16 +6,16 @@ Last updated: 2026-06-30
 
 Start every new context by reading this file and `migration-docs/migration-plan.md`.
 
-Current stop point: Phase 1 is complete. Open `src\TravelToursWebsite.Api.sln` in Visual Studio for the new API-only solution. Stop here so the code can be reviewed and pushed to the new repo.
+Current stop point: Phase 2 is complete. Review and push the shared API foundation before starting domain migration.
 
-Next phase to start only after Phase 1 is reviewed and pushed: Phase 2 - Shared API foundation.
+Next phase to start only after Phase 2 is reviewed and pushed: Phase 3 - Domain migration.
 
 ## Phase Status
 
 | Phase | Name | Status | Completed On | Notes |
 |---:|---|---|---|---|
 | 1 | Project setup and migration docs | Done | 2026-06-30 | Created .NET 8 API/Application/Infrastructure/Domain shell, added migration docs inside the new `src` repo, created API-only `TravelToursWebsite.Api.sln` and `TravelToursWebsite.Api.slnx`, added `.gitignore`, and verified build with `dotnet build src\TravelToursWebsite.Api\TravelToursWebsite.Api.csproj --no-restore -m:1`. |
-| 2 | Shared API foundation | Not Started |  | Add response model, ProblemDetails, middleware, Swagger, versioning, CORS, rate limiting, health checks. |
+| 2 | Shared API foundation | Done | 2026-06-30 | Added API response model, validation error response shaping, RFC 7807 ProblemDetails customization, global exception handler, Swagger/OpenAPI with API versioning, CORS allowlist config, fixed-window rate limiting, health checks, and versioned `/api/v1` info endpoint. Verified build and user smoke-tested `https://localhost:7157/api/v1`. |
 | 3 | Domain migration | Not Started |  | Move/normalize entities/enums into Domain. |
 | 4 | Infrastructure EF Core | Not Started |  | Port DbContext and EF configuration to .NET 8. |
 | 5 | Application contracts | Not Started |  | Add DTOs, validators, manual mapping, query contracts. |
@@ -50,4 +50,27 @@ Next phase to start only after Phase 1 is reviewed and pushed: Phase 2 - Shared 
 - Result: build succeeded with 0 warnings and 0 errors.
 - Note: normal parallel MSBuild hit generated-file access denied in this Windows sandbox; use `-m:1` if it happens again.
 
+## Phase 2 Checklist
 
+- [x] Add package references for Swagger/OpenAPI and API versioning.
+- [x] Add unified API response model.
+- [x] Add validation error response shaping.
+- [x] Add RFC 7807 `ProblemDetails` customization.
+- [x] Add global exception handler.
+- [x] Add Swagger/OpenAPI generation for versioned APIs.
+- [x] Add API versioning with URL segment and `X-Api-Version` support.
+- [x] Add CORS allowlist configuration.
+- [x] Add fixed-window rate limiting.
+- [x] Add health check endpoint.
+- [x] Add versioned API info endpoint.
+- [x] Verify setup/build.
+- [x] Mark Phase 2 as Done.
+
+## Phase 2 Verification
+
+- Command: `dotnet restore src\TravelToursWebsite.Api\TravelToursWebsite.Api.csproj`
+- Command: `dotnet build src\TravelToursWebsite.Api\TravelToursWebsite.Api.csproj --no-restore -m:1`
+- Command while local API process was running: `dotnet build src\TravelToursWebsite.Api\TravelToursWebsite.Api.csproj --no-restore -m:1 --output C:\tmp\TravelToursWebsite.Api-phase2-build`
+- Result: build succeeded with 0 warnings and 0 errors.
+- Note: if the API is running, normal Debug output can be locked by `TravelToursWebsite.Api.exe`; build to a temp output folder or stop the process before rebuilding.
+- User smoke test: `GET https://localhost:7157/api/v1` returned 200 with `success: true`, `status: Phase 2 foundation ready`, and `api-supported-versions: 1.0`.
