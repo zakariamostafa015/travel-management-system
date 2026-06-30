@@ -1,11 +1,11 @@
+using TravelToursWebsite.Api.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddApiFoundation(builder.Configuration);
+
 var app = builder.Build();
 
-app.MapGet("/", () => Results.Ok(new
-{
-    Service = "TravelToursWebsite API",
-    Status = "Phase 1 scaffold ready"
-}));
-
+app.UseApiFoundation();
+app.MapApiFoundationEndpoints();
 app.Run();
-
