@@ -70,6 +70,8 @@ public sealed record TourCategoryDto(
 public sealed record TourImageDto(
     int Id,
     string ImagePath,
+    string? ImageUrl,
+    string? ImageLocalPath,
     string? ThumbnailPath,
     string? MediumPath,
     string? AltText,
@@ -241,6 +243,8 @@ public static class TourMappingExtensions
         return new TourImageDto(
             image.Id,
             image.ImagePath,
+            image.ImageUrl,
+            image.ImageLocalPath,
             image.ThumbnailPath,
             image.MediumPath,
             image.AltText,

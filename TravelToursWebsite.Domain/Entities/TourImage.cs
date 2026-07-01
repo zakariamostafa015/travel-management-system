@@ -15,6 +15,12 @@ public class TourImage
     public string ImagePath { get; set; } = string.Empty;
 
     [StringLength(500)]
+    public string? ImageUrl { get; set; }
+
+    [StringLength(500)]
+    public string? ImageLocalPath { get; set; }
+
+    [StringLength(500)]
     public string? ThumbnailPath { get; set; }
 
     [StringLength(500)]
