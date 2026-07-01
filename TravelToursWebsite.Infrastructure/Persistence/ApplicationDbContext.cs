@@ -26,6 +26,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Language> Languages => Set<Language>();
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<DepartmentTranslation> DepartmentTranslations => Set<DepartmentTranslation>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

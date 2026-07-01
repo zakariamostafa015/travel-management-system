@@ -38,4 +38,5 @@ public class User
     public DateTime? LastLoginDate { get; set; }
 
     public ICollection<BlogPost> BlogPosts { get; set; } = new List<BlogPost>();
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }
