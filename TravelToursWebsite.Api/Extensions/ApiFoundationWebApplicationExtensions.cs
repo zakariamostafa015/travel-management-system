@@ -45,6 +45,7 @@ internal static class ApiFoundationWebApplicationExtensions
         }
 
         app.UseHttpsRedirection();
+        app.UseStaticFiles();
         app.UseCors(ApiFoundationServiceExtensions.CorsPolicyName);
         app.UseRateLimiter();
         app.MapControllers();

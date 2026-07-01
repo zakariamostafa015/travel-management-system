@@ -68,6 +68,8 @@ public sealed record BlogCategoryDto(
 public sealed record BlogImageDto(
     int Id,
     string ImagePath,
+    string? ImageUrl,
+    string? ImageLocalPath,
     string? ThumbnailPath,
     string? MediumPath,
     string? AltText,
@@ -213,6 +215,8 @@ public static class BlogMappingExtensions
         return new BlogImageDto(
             image.Id,
             image.ImagePath,
+            image.ImageUrl,
+            image.ImageLocalPath,
             image.ThumbnailPath,
             image.MediumPath,
             image.AltText,

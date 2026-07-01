@@ -107,6 +107,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         {
             entity.HasIndex(e => e.TourId);
             entity.HasIndex(e => e.IsMainImage);
+            entity.Property(e => e.ImageUrl).HasMaxLength(500);
+            entity.Property(e => e.ImageLocalPath).HasMaxLength(500);
             entity.HasOne(e => e.Tour)
                 .WithMany(t => t.Images)
                 .HasForeignKey(e => e.TourId)
@@ -175,6 +177,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         modelBuilder.Entity<BlogImage>(entity =>
         {
             entity.HasIndex(e => e.BlogPostId);
+            entity.Property(e => e.ImageUrl).HasMaxLength(500);
+            entity.Property(e => e.ImageLocalPath).HasMaxLength(500);
             entity.HasOne(e => e.BlogPost)
                 .WithMany(p => p.Images)
                 .HasForeignKey(e => e.BlogPostId)
