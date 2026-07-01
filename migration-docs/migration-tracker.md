@@ -6,9 +6,9 @@ Last updated: 2026-07-01
 
 Start every new context by reading this file and `migration-docs/migration-plan.md`.
 
-Current stop point: Phase 4 is complete. Review and push the EF Core infrastructure before starting application contracts.
+Current stop point: Phase 5 is complete. Review and push the application contracts before starting authentication.
 
-Next phase to start only after Phase 4 is reviewed and pushed: Phase 5 - Application contracts.
+Next phase to start only after Phase 5 is reviewed and pushed: Phase 6 - Auth API.
 
 ## Phase Status
 
@@ -18,7 +18,7 @@ Next phase to start only after Phase 4 is reviewed and pushed: Phase 5 - Applica
 | 2 | Shared API foundation | Done | 2026-06-30 | Added API response model, validation error response shaping, RFC 7807 ProblemDetails customization, global exception handler, Swagger/OpenAPI with API versioning, CORS allowlist config, fixed-window rate limiting, health checks, and versioned `/api/v1` info endpoint. Verified build and user smoke-tested `https://localhost:7157/api/v1`. |
 | 3 | Domain migration | Done | 2026-06-30 | Added domain entities/enums/configuration models under `TravelToursWebsite.Domain`, including `TeamMember`; preserved legacy model shape and verified no old Core/Data namespace references. |
 | 4 | Infrastructure EF Core | Done | 2026-07-01 | Added EF Core 8 SQL Server infrastructure, `ApplicationDbContext`, design-time context factory, baseline database seeder, DI registration, and API configuration wiring without copying legacy production secrets. |
-| 5 | Application contracts | Not Started |  | Add DTOs, validators, manual mapping, query contracts. |
+| 5 | Application contracts | Done | 2026-07-01 | Added shared paging/result contracts, feature DTOs, request/query contracts, FluentValidation validators, manual mapping extensions, cancellation-token-aware service interfaces, and Application DI registration. |
 | 6 | Auth API | Not Started |  | Add JWT auth, policies, refresh token support if needed. |
 | 7 | Media service | Not Started |  | Add WebP upload service and image URL/local path persistence. |
 | 8 | Public content APIs | Not Started |  | Add public home/tours/blog/content endpoints. |
@@ -118,6 +118,31 @@ Next phase to start only after Phase 4 is reviewed and pushed: Phase 5 - Applica
 - Command: `dotnet build src\TravelToursWebsite.Api\TravelToursWebsite.Api.csproj --no-restore -m:1 --output C:\tmp\TravelToursWebsite.Api-phase4-build`
 - Result: build succeeded with 0 warnings and 0 errors.
 - Command: `rg "TravelToursWebsite\.Core|TravelToursWebsite\.Data|TempModels" src\TravelToursWebsite.Infrastructure src\TravelToursWebsite.Domain`
+- Result: no matches.
+- Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70|SmtpPassword\"\s*:\s*\"" src`
+- Result: no copied legacy secret values found.
+
+## Phase 5 Checklist
+
+- [x] Add shared paging/query/result contracts.
+- [x] Add FluentValidation package and Application DI registration.
+- [x] Add public tour DTOs, requests, queries, validators, mapping extensions, and service interfaces.
+- [x] Add blog/event DTOs, requests, queries, validators, mapping extensions, and service interfaces.
+- [x] Add contact inquiry and booking DTOs, requests, queries, validators, mapping extensions, and service interfaces.
+- [x] Add admin operation DTOs, requests, queries, validators, mapping extensions, and service interfaces for users, languages, departments, team members, and site settings.
+- [x] Wire Application registration into API startup.
+- [x] Verify Application has no EF or old Core/Data namespace references.
+- [x] Verify no legacy production secrets were copied into `src`.
+- [x] Verify build.
+- [x] Mark Phase 5 as Done.
+
+## Phase 5 Verification
+
+- Command: `dotnet restore src\TravelToursWebsite.Api.sln`
+- Result: restore succeeded.
+- Command: `dotnet build src\TravelToursWebsite.Api\TravelToursWebsite.Api.csproj --no-restore -m:1 --output C:\tmp\TravelToursWebsite.Api-phase5-build`
+- Result: build succeeded with 0 warnings and 0 errors.
+- Command: `rg "TravelToursWebsite\.Core|TravelToursWebsite\.Data|TempModels|Microsoft\.EntityFrameworkCore" src\TravelToursWebsite.Application`
 - Result: no matches.
 - Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70|SmtpPassword\"\s*:\s*\"" src`
 - Result: no copied legacy secret values found.
