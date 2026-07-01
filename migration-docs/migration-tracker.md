@@ -6,9 +6,9 @@ Last updated: 2026-07-01
 
 Start every new context by reading this file and `migration-docs/migration-plan.md`.
 
-Current stop point: Phase 5 is complete. Review and push the application contracts before starting authentication.
+Current stop point: Phase 6 is complete. Review and push the Auth API before starting the media service.
 
-Next phase to start only after Phase 5 is reviewed and pushed: Phase 6 - Auth API.
+Next phase to start only after Phase 6 is reviewed and pushed: Phase 7 - Media service.
 
 ## Phase Status
 
@@ -19,7 +19,7 @@ Next phase to start only after Phase 5 is reviewed and pushed: Phase 6 - Auth AP
 | 3 | Domain migration | Done | 2026-06-30 | Added domain entities/enums/configuration models under `TravelToursWebsite.Domain`, including `TeamMember`; preserved legacy model shape and verified no old Core/Data namespace references. |
 | 4 | Infrastructure EF Core | Done | 2026-07-01 | Added EF Core 8 SQL Server infrastructure, `ApplicationDbContext`, design-time context factory, baseline database seeder, DI registration, and API configuration wiring without copying legacy production secrets. |
 | 5 | Application contracts | Done | 2026-07-01 | Added shared paging/result contracts, feature DTOs, request/query contracts, FluentValidation validators, manual mapping extensions, cancellation-token-aware service interfaces, and Application DI registration. |
-| 6 | Auth API | Not Started |  | Add JWT auth, policies, refresh token support if needed. |
+| 6 | Auth API | Done | 2026-07-01 | Added JWT bearer authentication, role policies, auth contracts, legacy password-hash compatibility, token service, refresh-token persistence, auth endpoints, Swagger bearer support, safe JWT configuration, and a forward-only refresh-token migration. |
 | 7 | Media service | Not Started |  | Add WebP upload service and image URL/local path persistence. |
 | 8 | Public content APIs | Not Started |  | Add public home/tours/blog/content endpoints. |
 | 9 | Contact and booking APIs | Not Started |  | Add inquiry and booking endpoints. |
@@ -146,3 +146,32 @@ Next phase to start only after Phase 5 is reviewed and pushed: Phase 6 - Auth AP
 - Result: no matches.
 - Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70|SmtpPassword\"\s*:\s*\"" src`
 - Result: no copied legacy secret values found.
+## Phase 6 Checklist
+
+- [x] Add JWT bearer package and configuration.
+- [x] Add safe JWT settings with environment-driven production secret.
+- [x] Add role authorization policies for admin/content/authoring access.
+- [x] Add Auth application contracts, DTOs, validators, and service interfaces.
+- [x] Preserve legacy PBKDF2 password-hash compatibility.
+- [x] Add JWT access-token generation service.
+- [x] Add refresh-token domain entity and EF configuration.
+- [x] Add forward-only EF migration for `RefreshTokens`.
+- [x] Add login, refresh, revoke, and current-user auth service behavior.
+- [x] Add versioned `/api/v1/auth` endpoints.
+- [x] Add Swagger bearer-token security definition.
+- [x] Verify no old Core/Data namespace references were introduced.
+- [x] Verify no legacy production secrets were copied into `src`.
+- [x] Verify build.
+- [x] Mark Phase 6 as Done.
+
+## Phase 6 Verification
+
+- Command: `dotnet restore src\TravelToursWebsite.Api.sln`
+- Result: restore succeeded.
+- Command: `dotnet build src\TravelToursWebsite.Api\TravelToursWebsite.Api.csproj --no-restore -m:1 --output C:\tmp\TravelToursWebsite.Api-phase6-build`
+- Result: build succeeded with 0 warnings and 0 errors.
+- Command: `rg "TravelToursWebsite\.Core|TravelToursWebsite\.Data|TempModels" src\TravelToursWebsite.Application src\TravelToursWebsite.Infrastructure src\TravelToursWebsite.Api src\TravelToursWebsite.Domain`
+- Result: no matches.
+- Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70|SmtpPassword\"\s*:\s*\"" src`
+- Result: no copied legacy secret values found.
+- Note: apply the `AddRefreshTokens` migration before using refresh-token endpoints against an existing database.

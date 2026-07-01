@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using TravelToursWebsite.Application.Features.Auth;
+using TravelToursWebsite.Infrastructure.Auth;
 using TravelToursWebsite.Infrastructure.Persistence;
 
 namespace TravelToursWebsite.Infrastructure.DependencyInjection;

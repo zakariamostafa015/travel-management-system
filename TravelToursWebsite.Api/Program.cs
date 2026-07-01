@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApiFoundation(builder.Configuration);
 builder.Services.AddApplication();
+builder.Services.AddJwtAuthentication(builder.Configuration, builder.Environment);
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DefaultConnection"));
 
 var app = builder.Build();
