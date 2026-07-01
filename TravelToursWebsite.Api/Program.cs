@@ -1,8 +1,10 @@
 using TravelToursWebsite.Api.Extensions;
+using TravelToursWebsite.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApiFoundation(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DefaultConnection"));
 
 var app = builder.Build();
 
