@@ -1,14 +1,14 @@
 # Migration Tracker
 
-Last updated: 2026-06-30
+Last updated: 2026-07-01
 
 ## Resume Instructions
 
 Start every new context by reading this file and `migration-docs/migration-plan.md`.
 
-Current stop point: Phase 3 is complete. Review and push the domain migration before starting EF Core infrastructure.
+Current stop point: Phase 4 is complete. Review and push the EF Core infrastructure before starting application contracts.
 
-Next phase to start only after Phase 3 is reviewed and pushed: Phase 4 - Infrastructure EF Core.
+Next phase to start only after Phase 4 is reviewed and pushed: Phase 5 - Application contracts.
 
 ## Phase Status
 
@@ -17,7 +17,7 @@ Next phase to start only after Phase 3 is reviewed and pushed: Phase 4 - Infrast
 | 1 | Project setup and migration docs | Done | 2026-06-30 | Created .NET 8 API/Application/Infrastructure/Domain shell, added migration docs inside the new `src` repo, created API-only `TravelToursWebsite.Api.sln` and `TravelToursWebsite.Api.slnx`, added `.gitignore`, and verified build with `dotnet build src\TravelToursWebsite.Api\TravelToursWebsite.Api.csproj --no-restore -m:1`. |
 | 2 | Shared API foundation | Done | 2026-06-30 | Added API response model, validation error response shaping, RFC 7807 ProblemDetails customization, global exception handler, Swagger/OpenAPI with API versioning, CORS allowlist config, fixed-window rate limiting, health checks, and versioned `/api/v1` info endpoint. Verified build and user smoke-tested `https://localhost:7157/api/v1`. |
 | 3 | Domain migration | Done | 2026-06-30 | Added domain entities/enums/configuration models under `TravelToursWebsite.Domain`, including `TeamMember`; preserved legacy model shape and verified no old Core/Data namespace references. |
-| 4 | Infrastructure EF Core | Not Started |  | Port DbContext and EF configuration to .NET 8. |
+| 4 | Infrastructure EF Core | Done | 2026-07-01 | Added EF Core 8 SQL Server infrastructure, `ApplicationDbContext`, design-time context factory, baseline database seeder, DI registration, and API configuration wiring without copying legacy production secrets. |
 | 5 | Application contracts | Not Started |  | Add DTOs, validators, manual mapping, query contracts. |
 | 6 | Auth API | Not Started |  | Add JWT auth, policies, refresh token support if needed. |
 | 7 | Media service | Not Started |  | Add WebP upload service and image URL/local path persistence. |
@@ -74,6 +74,7 @@ Next phase to start only after Phase 3 is reviewed and pushed: Phase 4 - Infrast
 - Result: build succeeded with 0 warnings and 0 errors.
 - Note: if the API is running, normal Debug output can be locked by `TravelToursWebsite.Api.exe`; build to a temp output folder or stop the process before rebuilding.
 - User smoke test: `GET https://localhost:7157/api/v1` returned 200 with `success: true`, `status: Phase 2 foundation ready`, and `api-supported-versions: 1.0`.
+
 ## Phase 3 Checklist
 
 - [x] Add `Entities` folder to Domain.
@@ -94,3 +95,29 @@ Next phase to start only after Phase 3 is reviewed and pushed: Phase 4 - Infrast
 - Result: no matches.
 - Command: `dotnet build TravelToursWebsite.Api.sln --no-restore -m:1`
 - Result: build succeeded with 0 warnings and 0 errors.
+
+## Phase 4 Checklist
+
+- [x] Add EF Core 8 SQL Server package references to Infrastructure.
+- [x] Add `ApplicationDbContext` with DbSets for migrated Domain entities.
+- [x] Port legacy indexes, unique constraints, delete behavior, and decimal precision.
+- [x] Add design-time DbContext factory for EF tooling.
+- [x] Add baseline database seeder for languages and non-secret site settings.
+- [x] Add Infrastructure DI registration for SQL Server DbContext.
+- [x] Wire Infrastructure registration into API startup.
+- [x] Add safe connection-string placeholders without copying committed production credentials.
+- [x] Verify Infrastructure/Domain have no old Core/Data namespace references.
+- [x] Verify no legacy production secrets were copied into `src`.
+- [x] Verify build.
+- [x] Mark Phase 4 as Done.
+
+## Phase 4 Verification
+
+- Command: `dotnet restore src\TravelToursWebsite.Api.sln`
+- Result: restore succeeded.
+- Command: `dotnet build src\TravelToursWebsite.Api\TravelToursWebsite.Api.csproj --no-restore -m:1 --output C:\tmp\TravelToursWebsite.Api-phase4-build`
+- Result: build succeeded with 0 warnings and 0 errors.
+- Command: `rg "TravelToursWebsite\.Core|TravelToursWebsite\.Data|TempModels" src\TravelToursWebsite.Infrastructure src\TravelToursWebsite.Domain`
+- Result: no matches.
+- Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70|SmtpPassword\"\s*:\s*\"" src`
+- Result: no copied legacy secret values found.
