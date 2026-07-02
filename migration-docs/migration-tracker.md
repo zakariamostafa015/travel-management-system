@@ -1,14 +1,14 @@
 # Migration Tracker
 
-Last updated: 2026-07-01
+Last updated: 2026-07-02
 
 ## Resume Instructions
 
 Start every new context by reading this file and `migration-docs/migration-plan.md`.
 
-Current stop point: Phase 7 is complete. Review and push the media service before starting public content APIs.
+Current stop point: Phase 8 is complete. Review and push the public content APIs before starting contact and booking APIs.
 
-Next phase to start only after Phase 7 is reviewed and pushed: Phase 8 - Public content APIs.
+Next phase to start only after Phase 8 is reviewed and pushed: Phase 9 - Contact and booking APIs.
 
 ## Phase Status
 
@@ -21,7 +21,7 @@ Next phase to start only after Phase 7 is reviewed and pushed: Phase 8 - Public 
 | 5 | Application contracts | Done | 2026-07-01 | Added shared paging/result contracts, feature DTOs, request/query contracts, FluentValidation validators, manual mapping extensions, cancellation-token-aware service interfaces, and Application DI registration. |
 | 6 | Auth API | Done | 2026-07-01 | Added JWT bearer authentication, role policies, auth contracts, legacy password-hash compatibility, token service, refresh-token persistence, auth endpoints, Swagger bearer support, safe JWT configuration, and a forward-only refresh-token migration. |
 | 7 | Media service | Done | 2026-07-01 | Added WebP image upload service, media contracts, protected media endpoints, static upload serving, ImageSharp 3.1.11 processing, `ImageUrl`/`ImageLocalPath` model fields, and a forward-only image metadata migration. |
-| 8 | Public content APIs | Not Started |  | Add public home/tours/blog/content endpoints. |
+| 8 | Public content APIs | Done | 2026-07-02 | Added EF-backed public catalog services, public home/settings contracts, versioned read-only tours/blog/category/home/content endpoints, localized slug fallback, active/published filtering, pagination/search/sorting, and DI wiring. |
 | 9 | Contact and booking APIs | Not Started |  | Add inquiry and booking endpoints. |
 | 10 | Admin content APIs | Not Started |  | Add admin tours/blog/categories/itineraries/spots/translations/images endpoints. |
 | 11 | Admin operations APIs | Not Started |  | Add admin users/languages/departments/team/settings/content endpoints. |
@@ -206,3 +206,26 @@ Next phase to start only after Phase 7 is reviewed and pushed: Phase 8 - Public 
 - Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70|SmtpPassword\"\s*:\s*\"" src`
 - Result: no copied legacy secret values found.
 - Note: apply the `AddImageUrlAndLocalPath` migration before relying on `ImageUrl`/`ImageLocalPath` persistence in an existing database.
+## Phase 8 Checklist
+
+- [x] Add public content contracts for home and site settings.
+- [x] Implement `ITourCatalogService` with active tour/category reads.
+- [x] Implement `IBlogCatalogService` with published blog/event/category reads.
+- [x] Support numeric ID and localized slug lookups with default-language fallback.
+- [x] Add search, filtering, sorting, bounded pagination, `AsNoTracking`, and cancellation-token-aware reads.
+- [x] Add public home summary and active site settings reads.
+- [x] Add versioned `/api/v1/tours`, `/api/v1/blog`, `/api/v1/home`, and `/api/v1/content/settings` endpoints.
+- [x] Wire catalog/public content services into Infrastructure DI.
+- [x] Verify no old Core/Data namespace references were introduced.
+- [x] Verify no legacy production secrets were copied into `src`.
+- [x] Verify build.
+- [x] Mark Phase 8 as Done.
+
+## Phase 8 Verification
+
+- Command: `dotnet build TravelToursWebsite.Api.sln --no-restore -m:1`
+- Result: build succeeded with 0 warnings and 0 errors.
+- Command: `rg "TravelToursWebsite\.Core|TravelToursWebsite\.Data|TempModels" TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Api TravelToursWebsite.Domain`
+- Result: no matches.
+- Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70|SmtpPassword\"\s*:\s*\"" .`
+- Result: no copied legacy secret values found.
