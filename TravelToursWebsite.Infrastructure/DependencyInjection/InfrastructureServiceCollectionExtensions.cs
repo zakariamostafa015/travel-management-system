@@ -2,10 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TravelToursWebsite.Application.Features.Auth;
 using TravelToursWebsite.Application.Features.Blog;
+using TravelToursWebsite.Application.Features.Contact;
 using TravelToursWebsite.Application.Features.Media;
 using TravelToursWebsite.Application.Features.PublicContent;
 using TravelToursWebsite.Application.Features.Tours;
 using TravelToursWebsite.Infrastructure.Auth;
+using TravelToursWebsite.Infrastructure.Contact;
 using TravelToursWebsite.Infrastructure.Media;
 using TravelToursWebsite.Infrastructure.Persistence;
 using TravelToursWebsite.Infrastructure.PublicContent;
@@ -24,6 +26,10 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IMediaStorageService, WebPImageStorageService>();
         services.AddScoped<ITourCatalogService, TourCatalogService>();
         services.AddScoped<IBlogCatalogService, BlogCatalogService>();
+        services.AddScoped<ContactApplicationService>();
+        services.AddScoped<IContactApplicationService>(provider => provider.GetRequiredService<ContactApplicationService>());
+        services.AddScoped<IBookingApplicationService>(provider => provider.GetRequiredService<ContactApplicationService>());
+        services.AddScoped<IContactNotificationService, EmailContactNotificationService>();
         services.AddScoped<IPublicHomeService, PublicContentService>();
         services.AddScoped<IPublicSettingsService, PublicContentService>();
 

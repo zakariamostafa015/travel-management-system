@@ -6,9 +6,9 @@ Last updated: 2026-07-02
 
 Start every new context by reading this file and `migration-docs/migration-plan.md`.
 
-Current stop point: Phase 8 is complete. Review and push the public content APIs before starting contact and booking APIs.
+Current stop point: Phase 9 is complete. Review and push the contact and booking APIs before starting admin content APIs.
 
-Next phase to start only after Phase 8 is reviewed and pushed: Phase 9 - Contact and booking APIs.
+Next phase to start only after Phase 9 is reviewed and pushed: Phase 10 - Admin content APIs.
 
 ## Phase Status
 
@@ -22,7 +22,7 @@ Next phase to start only after Phase 8 is reviewed and pushed: Phase 9 - Contact
 | 6 | Auth API | Done | 2026-07-01 | Added JWT bearer authentication, role policies, auth contracts, legacy password-hash compatibility, token service, refresh-token persistence, auth endpoints, Swagger bearer support, safe JWT configuration, and a forward-only refresh-token migration. |
 | 7 | Media service | Done | 2026-07-01 | Added WebP image upload service, media contracts, protected media endpoints, static upload serving, ImageSharp 3.1.11 processing, `ImageUrl`/`ImageLocalPath` model fields, and a forward-only image metadata migration. |
 | 8 | Public content APIs | Done | 2026-07-02 | Added EF-backed public catalog services, public home/settings contracts, versioned read-only tours/blog/category/home/content endpoints, localized slug fallback, active/published filtering, pagination/search/sorting, and DI wiring. |
-| 9 | Contact and booking APIs | Not Started |  | Add inquiry and booking endpoints. |
+| 9 | Contact and booking APIs | Done | 2026-07-02 | Added public inquiry/booking submission endpoints, protected admin list/detail/status/delete endpoints, EF-backed application services, booking total calculation, best-effort SMTP confirmation emails, and blank-safe email configuration. |
 | 10 | Admin content APIs | Not Started |  | Add admin tours/blog/categories/itineraries/spots/translations/images endpoints. |
 | 11 | Admin operations APIs | Not Started |  | Add admin users/languages/departments/team/settings/content endpoints. |
 | 12 | Audit and hardening | Not Started |  | Add audit logs, secrets cleanup, logging, performance/index improvements. |
@@ -229,3 +229,31 @@ Next phase to start only after Phase 8 is reviewed and pushed: Phase 9 - Contact
 - Result: no matches.
 - Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70|SmtpPassword\"\s*:\s*\"" .`
 - Result: no copied legacy secret values found.
+## Phase 9 Checklist
+
+- [x] Add contact notification abstraction to Application contracts.
+- [x] Implement EF-backed contact inquiry creation, listing, detail, status update, and delete behavior.
+- [x] Implement EF-backed booking request creation, listing, detail, status update, and delete behavior.
+- [x] Calculate booking estimated total as `Tour.Price * NumberOfTravelers`.
+- [x] Preserve save-first behavior when confirmation email delivery fails.
+- [x] Add SMTP confirmation email service with blank-safe configuration.
+- [x] Add public versioned `/api/v1/contact/inquiries` and `/api/v1/contact/bookings` submit endpoints.
+- [x] Add protected admin inquiry and booking management endpoints.
+- [x] Wire contact, booking, and notification services into Infrastructure DI.
+- [x] Verify no old Core/Data namespace references were introduced.
+- [x] Verify no legacy production secrets were copied into `src` source/config files.
+- [x] Verify build.
+- [x] Mark Phase 9 as Done.
+
+## Phase 9 Verification
+
+- Command: `dotnet build TravelToursWebsite.Api.sln --no-restore -m:1`
+- Result: build succeeded with 0 warnings and 0 errors.
+- Command: `rg "TravelToursWebsite\.Core|TravelToursWebsite\.Data|TempModels" TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Api TravelToursWebsite.Domain`
+- Result: no matches.
+- Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70" TravelToursWebsite.Api TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Domain`
+- Result: no copied legacy secret values found in source/config files.
+- Command: `Select-String -Path TravelToursWebsite.Api\appsettings*.json -Pattern '"SmtpPassword"\s*:\s*"[^\"]+"'`
+- Result: no non-empty SMTP password values found.
+- Command: parse `TravelToursWebsite.Api/appsettings.json` and `TravelToursWebsite.Api/appsettings.Development.json` as JSON.
+- Result: JSON parsed successfully.

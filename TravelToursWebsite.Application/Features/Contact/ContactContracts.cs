@@ -92,6 +92,11 @@ public interface IBookingApplicationService
     Task<OperationResult> DeleteBookingAsync(int id, CancellationToken cancellationToken = default);
 }
 
+public interface IContactNotificationService
+{
+    Task SendContactInquiryConfirmationAsync(ContactInquiry inquiry, CancellationToken cancellationToken = default);
+    Task SendBookingRequestConfirmationAsync(BookingRequest booking, CancellationToken cancellationToken = default);
+}
 public static class ContactMappingExtensions
 {
     public static ContactInquiryDto ToDto(this ContactInquiry inquiry)
