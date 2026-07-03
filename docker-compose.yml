@@ -1,0 +1,64 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: TravelToursWebsite.Api/Dockerfile
+    container_name: traveltours-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ASPNETCORE_URLS: http://+:8080
+      Database__MigrateOnStartup: ${DATABASE_MIGRATE_ON_STARTUP:-true}
+      Database__SeedOnStartup: ${DATABASE_SEED_ON_STARTUP:-true}
+      Database__RecreateWhenSchemaMissing: ${DATABASE_RECREATE_WHEN_SCHEMA_MISSING:-true}
+      ConnectionStrings__DefaultConnection: Server=sqlserver,1433;Database=${SQL_DATABASE};User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=True;MultipleActiveResultSets=true
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      Jwt__Secret: ${JWT_SECRET}
+      Jwt__AccessTokenMinutes: ${JWT_ACCESS_TOKEN_MINUTES:-30}
+      Jwt__RefreshTokenDays: ${JWT_REFRESH_TOKEN_DAYS:-7}
+      SeedAdmin__Username: ${SEED_ADMIN_USERNAME:-admin}
+      SeedAdmin__Email: ${SEED_ADMIN_EMAIL:-admin@traveltours.com}
+      SeedAdmin__Password: ${SEED_ADMIN_PASSWORD:-admin123}
+      SeedAdmin__UpdatePassword: ${SEED_ADMIN_UPDATE_PASSWORD:-false}
+      EmailSettings__SmtpServer: ${SMTP_SERVER:-}
+      EmailSettings__SmtpPort: ${SMTP_PORT:-587}
+      EmailSettings__SmtpUsername: ${SMTP_USERNAME:-}
+      EmailSettings__SmtpPassword: ${SMTP_PASSWORD:-}
+      Cors__AllowedOrigins__0: ${CORS_ALLOWED_ORIGIN_0:-http://localhost:3000}
+      Cors__AllowedOrigins__1: ${CORS_ALLOWED_ORIGIN_1:-http://localhost:4200}
+      Cors__AllowedOrigins__2: ${CORS_ALLOWED_ORIGIN_2:-http://localhost:5173}
+    ports:
+      - "${API_HTTP_PORT:-8080}:8080"
+    volumes:
+      - api-uploads:/app/wwwroot/uploads
+      - api-resources:/app/Resources
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: traveltours-sqlserver
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: ${SQL_EDITION:-Developer}
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD}
+    ports:
+      - "${SQL_PORT:-1433}:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q \"SELECT 1\" || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q \"SELECT 1\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+volumes:
+  sqlserver-data:
+  api-uploads:
+  api-resources:

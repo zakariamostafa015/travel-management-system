@@ -1,0 +1,35 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+**/[Bb]in/
+**/[Oo]bj/
+**/[Bb]in/**
+**/[Oo]bj/**
+
+# User/local files
+*.user
+*.rsuser
+*.suo
+.vs/
+.idea/
+.vscode/
+
+# Git and docs
+.git/
+.github/
+migration-docs/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+appsettings.*.Local.json
+
+# Runtime/generated files
+**/wwwroot/uploads/
+**/Resources/*.json
+
+# OS files
+.DS_Store
+Thumbs.db

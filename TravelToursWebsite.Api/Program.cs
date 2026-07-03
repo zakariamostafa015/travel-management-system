@@ -15,6 +15,8 @@ builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("De
 
 var app = builder.Build();
 
+await app.InitializeDatabaseAsync();
+
 app.UseApiFoundation();
 app.MapApiFoundationEndpoints();
 app.Run();
