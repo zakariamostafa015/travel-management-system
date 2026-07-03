@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TravelToursWebsite.Application.Features.AdminContent;
+using TravelToursWebsite.Application.Features.Administration;
 using TravelToursWebsite.Application.Features.Auth;
 using TravelToursWebsite.Application.Features.Blog;
 using TravelToursWebsite.Application.Features.Contact;
@@ -8,6 +9,7 @@ using TravelToursWebsite.Application.Features.Media;
 using TravelToursWebsite.Application.Features.PublicContent;
 using TravelToursWebsite.Application.Features.Tours;
 using TravelToursWebsite.Infrastructure.AdminContent;
+using TravelToursWebsite.Infrastructure.Administration;
 using TravelToursWebsite.Infrastructure.Auth;
 using TravelToursWebsite.Infrastructure.Contact;
 using TravelToursWebsite.Infrastructure.Media;
@@ -37,6 +39,11 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IContactApplicationService>(provider => provider.GetRequiredService<ContactApplicationService>());
         services.AddScoped<IBookingApplicationService>(provider => provider.GetRequiredService<ContactApplicationService>());
         services.AddScoped<IContactNotificationService, EmailContactNotificationService>();
+        services.AddScoped<AdminOperationsService>();
+        services.AddScoped<IUserApplicationService>(provider => provider.GetRequiredService<AdminOperationsService>());
+        services.AddScoped<ILanguageApplicationService>(provider => provider.GetRequiredService<AdminOperationsService>());
+        services.AddScoped<IOperationsContentService>(provider => provider.GetRequiredService<AdminOperationsService>());
+        services.AddScoped<IResourceContentService, ResourceContentService>();
         services.AddScoped<IPublicHomeService, PublicContentService>();
         services.AddScoped<IPublicSettingsService, PublicContentService>();
 

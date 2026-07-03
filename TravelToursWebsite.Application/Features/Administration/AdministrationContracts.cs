@@ -145,6 +145,13 @@ public sealed record SiteSettingsDto(
     SettingType Type,
     bool IsActive);
 
+public sealed record ResourceContentLanguageDto(string CultureCode, bool IsValid);
+
+public sealed record ResourceContentItemDto(
+    string Key,
+    string Category,
+    IReadOnlyDictionary<string, string> Translations);
+
 public sealed record UpsertSiteSettingsRequest(
     int? Id,
     string Key,
@@ -155,6 +162,10 @@ public sealed record UpsertSiteSettingsRequest(
     int SortOrder,
     SettingType Type,
     bool IsActive);
+
+public sealed record UpsertResourceContentItemRequest(
+    string Key,
+    IReadOnlyDictionary<string, string> Translations);
 
 public interface IUserApplicationService
 {
@@ -192,6 +203,16 @@ public interface IOperationsContentService
     Task<PagedResult<SiteSettingsDto>> GetSiteSettingsAsync(SiteSettingsQuery query, CancellationToken cancellationToken = default);
     Task<OperationResult<SiteSettingsDto>> UpsertSiteSettingsAsync(UpsertSiteSettingsRequest request, CancellationToken cancellationToken = default);
     Task<OperationResult> DeleteSiteSettingsAsync(int id, CancellationToken cancellationToken = default);
+}
+
+public interface IResourceContentService
+{
+    Task<IReadOnlyList<ResourceContentLanguageDto>> GetLanguagesAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyDictionary<string, string>> GetLanguageContentAsync(string cultureCode, CancellationToken cancellationToken = default);
+    Task<ResourceContentItemDto> GetContentItemAsync(string key, CancellationToken cancellationToken = default);
+    Task<OperationResult<ResourceContentItemDto>> UpsertContentItemAsync(UpsertResourceContentItemRequest request, CancellationToken cancellationToken = default);
+    Task<OperationResult> DeleteContentItemAsync(string key, CancellationToken cancellationToken = default);
+    Task<bool> ValidateLanguageFileAsync(string cultureCode, CancellationToken cancellationToken = default);
 }
 
 public static class AdministrationMappingExtensions

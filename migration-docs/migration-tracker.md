@@ -6,9 +6,9 @@ Last updated: 2026-07-03
 
 Start every new context by reading this file and `migration-docs/migration-plan.md`.
 
-Current stop point: Phase 10 is complete. Review and push the admin content APIs before starting admin operations APIs.
+Current stop point: Phase 11 is complete. Review and push the admin operations APIs before starting audit and hardening.
 
-Next phase to start only after Phase 10 is reviewed and pushed: Phase 11 - Admin operations APIs.
+Next phase to start only after Phase 11 is reviewed and pushed: Phase 12 - Audit and hardening.
 
 ## Phase Status
 
@@ -24,7 +24,7 @@ Next phase to start only after Phase 10 is reviewed and pushed: Phase 11 - Admin
 | 8 | Public content APIs | Done | 2026-07-02 | Added EF-backed public catalog services, public home/settings contracts, versioned read-only tours/blog/category/home/content endpoints, localized slug fallback, active/published filtering, pagination/search/sorting, and DI wiring. |
 | 9 | Contact and booking APIs | Done | 2026-07-02 | Added public inquiry/booking submission endpoints, protected admin list/detail/status/delete endpoints, EF-backed application services, booking total calculation, best-effort SMTP confirmation emails, and blank-safe email configuration. |
 | 10 | Admin content APIs | Done | 2026-07-03 | Added protected admin tour/blog content controllers, EF-backed management service, admin content contracts, category safeguards, image association endpoints, itinerary/spot endpoints, and translation upsert/list endpoints. |
-| 11 | Admin operations APIs | Not Started |  | Add admin users/languages/departments/team/settings/content endpoints. |
+| 11 | Admin operations APIs | Done | 2026-07-03 | Added protected admin users, languages, departments, team members, site settings, and JSON resource content endpoints with EF/file-backed services and DI wiring. |
 | 12 | Audit and hardening | Not Started |  | Add audit logs, secrets cleanup, logging, performance/index improvements. |
 | 13 | Final cleanup | Not Started |  | Final docs and migration checklist. |
 
@@ -284,3 +284,29 @@ Next phase to start only after Phase 10 is reviewed and pushed: Phase 11 - Admin
 - Result: no copied legacy secret values found in source/config files.
 - Command: parse `TravelToursWebsite.Api/appsettings.json` and `TravelToursWebsite.Api/appsettings.Development.json` as JSON.
 - Result: JSON parsed successfully.
+
+## Phase 11 Checklist
+
+- [x] Add resource content contracts for JSON localization content.
+- [x] Implement EF-backed admin user management service behavior.
+- [x] Implement EF-backed language management service behavior with default/active-language safeguards.
+- [x] Implement EF-backed department management with team-member delete safeguard.
+- [x] Implement EF-backed team member management.
+- [x] Implement EF-backed site settings management.
+- [x] Implement file-backed JSON resource content management.
+- [x] Add protected admin users controller.
+- [x] Add protected admin operations controller for languages, departments, team members, settings, and resources.
+- [x] Wire admin operations services into Infrastructure DI.
+- [x] Verify no old Core/Data namespace references were introduced.
+- [x] Verify no legacy production secrets were copied into `src` source/config files.
+- [x] Verify build.
+- [x] Mark Phase 11 as Done.
+
+## Phase 11 Verification
+
+- Command: `dotnet build TravelToursWebsite.Api.sln --no-restore -m:1`
+- Result: build succeeded with 0 warnings and 0 errors.
+- Command: `rg "TravelToursWebsite\.Core|TravelToursWebsite\.Data|TempModels" TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Api TravelToursWebsite.Domain`
+- Result: no matches.
+- Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70" TravelToursWebsite.Api TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Domain`
+- Result: no copied legacy secret values found in source/config files.
