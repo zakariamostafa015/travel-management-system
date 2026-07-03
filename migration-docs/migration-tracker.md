@@ -6,9 +6,9 @@ Last updated: 2026-07-03
 
 Start every new context by reading this file and `migration-docs/migration-plan.md`.
 
-Current stop point: Phase 12 is complete. Review and push audit and hardening before starting final cleanup.
+Current stop point: Phase 13 is complete. The planned MVC-to-Web-API migration phases are complete and ready for final review, migration application, and cutover validation.
 
-Next phase to start only after Phase 12 is reviewed and pushed: Phase 13 - Final cleanup.
+Next phase: none in the current roadmap.
 
 ## Phase Status
 
@@ -26,7 +26,7 @@ Next phase to start only after Phase 12 is reviewed and pushed: Phase 13 - Final
 | 10 | Admin content APIs | Done | 2026-07-03 | Added protected admin tour/blog content controllers, EF-backed management service, admin content contracts, category safeguards, image association endpoints, itinerary/spot endpoints, and translation upsert/list endpoints. |
 | 11 | Admin operations APIs | Done | 2026-07-03 | Added protected admin users, languages, departments, team members, site settings, and JSON resource content endpoints with EF/file-backed services and DI wiring. |
 | 12 | Audit and hardening | Done | 2026-07-03 | Added persistent audit logs, admin audit read endpoints, authenticated mutation audit middleware, auth middleware pipeline hardening, HSTS, EF/logging hardening, and slug/audit indexes. |
-| 13 | Final cleanup | Not Started |  | Final docs and migration checklist. |
+| 13 | Final cleanup | Done | 2026-07-03 | Added endpoint reference, final migration/cutover checklist, README handoff links, and removed stale API readiness text. |
 
 ## Phase 1 Checklist
 
@@ -338,3 +338,29 @@ Next phase to start only after Phase 12 is reviewed and pushed: Phase 13 - Final
 - Result: no copied legacy secret values found in source/config files.
 - Command: parse `TravelToursWebsite.Api/appsettings.json` and `TravelToursWebsite.Api/appsettings.Development.json` as JSON.
 - Result: JSON parsed successfully.
+
+## Phase 13 Checklist
+
+- [x] Add API endpoint reference documentation.
+- [x] Add final database/configuration/smoke-test/cutover checklist.
+- [x] Update migration docs README with final handoff links.
+- [x] Remove stale API readiness text from root API info endpoint.
+- [x] Check for obvious API-scope dead files/placeholders.
+- [x] Verify no old Core/Data namespace references were introduced.
+- [x] Verify no legacy production secrets were copied into `src` source/config files.
+- [x] Verify appsettings JSON parses successfully.
+- [x] Verify build.
+- [x] Mark Phase 13 as Done.
+
+## Phase 13 Verification
+
+- Command: `dotnet build TravelToursWebsite.Api.sln --no-restore -m:1`
+- Result: build succeeded with 0 warnings and 0 errors.
+- Command: `rg "TravelToursWebsite\.Core|TravelToursWebsite\.Data|TempModels" TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Api TravelToursWebsite.Domain`
+- Result: no matches.
+- Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70" TravelToursWebsite.Api TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Domain`
+- Result: no copied legacy secret values found in source/config files.
+- Command: parse `TravelToursWebsite.Api/appsettings.json` and `TravelToursWebsite.Api/appsettings.Development.json` as JSON.
+- Result: JSON parsed successfully.
+- Command: `rg --files TravelToursWebsite.Api TravelToursWebsite.Application TravelToursWebsite.Domain TravelToursWebsite.Infrastructure | rg "Class1\.cs$|\.bak$|\.tmp$|\.old$"`
+- Result: no obvious placeholder or temporary API-scope files found.

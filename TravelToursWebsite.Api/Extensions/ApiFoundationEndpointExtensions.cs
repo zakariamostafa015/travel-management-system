@@ -25,7 +25,7 @@ internal static class ApiFoundationEndpointExtensions
                 new
                 {
                     Service = "TravelToursWebsite API",
-                    Status = "Phase 2 foundation ready",
+                    Status = "Ready",
                     Version = "1.0"
                 },
                 traceId: httpContext.TraceIdentifier)))
