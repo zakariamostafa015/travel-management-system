@@ -1,5 +1,6 @@
 using Asp.Versioning.ApiExplorer;
 using Microsoft.AspNetCore.Mvc;
+using TravelToursWebsite.Api.Middleware;
 
 namespace TravelToursWebsite.Api.Extensions;
 
@@ -43,11 +44,18 @@ internal static class ApiFoundationWebApplicationExtensions
                 }
             });
         }
+        else
+        {
+            app.UseHsts();
+        }
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
         app.UseCors(ApiFoundationServiceExtensions.CorsPolicyName);
         app.UseRateLimiter();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.UseMiddleware<AuditLoggingMiddleware>();
         app.MapControllers();
 
         return app;

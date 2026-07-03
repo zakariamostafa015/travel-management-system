@@ -6,9 +6,9 @@ Last updated: 2026-07-03
 
 Start every new context by reading this file and `migration-docs/migration-plan.md`.
 
-Current stop point: Phase 11 is complete. Review and push the admin operations APIs before starting audit and hardening.
+Current stop point: Phase 12 is complete. Review and push audit and hardening before starting final cleanup.
 
-Next phase to start only after Phase 11 is reviewed and pushed: Phase 12 - Audit and hardening.
+Next phase to start only after Phase 12 is reviewed and pushed: Phase 13 - Final cleanup.
 
 ## Phase Status
 
@@ -25,7 +25,7 @@ Next phase to start only after Phase 11 is reviewed and pushed: Phase 12 - Audit
 | 9 | Contact and booking APIs | Done | 2026-07-02 | Added public inquiry/booking submission endpoints, protected admin list/detail/status/delete endpoints, EF-backed application services, booking total calculation, best-effort SMTP confirmation emails, and blank-safe email configuration. |
 | 10 | Admin content APIs | Done | 2026-07-03 | Added protected admin tour/blog content controllers, EF-backed management service, admin content contracts, category safeguards, image association endpoints, itinerary/spot endpoints, and translation upsert/list endpoints. |
 | 11 | Admin operations APIs | Done | 2026-07-03 | Added protected admin users, languages, departments, team members, site settings, and JSON resource content endpoints with EF/file-backed services and DI wiring. |
-| 12 | Audit and hardening | Not Started |  | Add audit logs, secrets cleanup, logging, performance/index improvements. |
+| 12 | Audit and hardening | Done | 2026-07-03 | Added persistent audit logs, admin audit read endpoints, authenticated mutation audit middleware, auth middleware pipeline hardening, HSTS, EF/logging hardening, and slug/audit indexes. |
 | 13 | Final cleanup | Not Started |  | Final docs and migration checklist. |
 
 ## Phase 1 Checklist
@@ -310,3 +310,31 @@ Next phase to start only after Phase 11 is reviewed and pushed: Phase 12 - Audit
 - Result: no matches.
 - Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70" TravelToursWebsite.Api TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Domain`
 - Result: no copied legacy secret values found in source/config files.
+
+## Phase 12 Checklist
+
+- [x] Add audit log domain entity and DbContext mapping.
+- [x] Add audit log application contracts, query DTOs, and validators.
+- [x] Implement EF-backed audit log persistence and read service.
+- [x] Add protected admin audit log list/detail endpoints.
+- [x] Add audit middleware for authenticated mutating requests.
+- [x] Wire authentication and authorization middleware into the API pipeline.
+- [x] Add HSTS for non-development environments.
+- [x] Add EF/logging hardening defaults.
+- [x] Add forward-only migration for audit logs and slug/audit indexes.
+- [x] Verify no old Core/Data namespace references were introduced.
+- [x] Verify no legacy production secrets were copied into `src` source/config files.
+- [x] Verify appsettings JSON parses successfully.
+- [x] Verify build.
+- [x] Mark Phase 12 as Done.
+
+## Phase 12 Verification
+
+- Command: `dotnet build TravelToursWebsite.Api.sln --no-restore -m:1`
+- Result: build succeeded with 0 warnings and 0 errors.
+- Command: `rg "TravelToursWebsite\.Core|TravelToursWebsite\.Data|TempModels" TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Api TravelToursWebsite.Domain`
+- Result: no matches.
+- Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70" TravelToursWebsite.Api TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Domain`
+- Result: no copied legacy secret values found in source/config files.
+- Command: parse `TravelToursWebsite.Api/appsettings.json` and `TravelToursWebsite.Api/appsettings.Development.json` as JSON.
+- Result: JSON parsed successfully.

@@ -27,6 +27,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<DepartmentTranslation> DepartmentTranslations => Set<DepartmentTranslation>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,6 +36,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         ConfigureTours(modelBuilder);
         ConfigureBlog(modelBuilder);
         ConfigureOperations(modelBuilder);
+        ConfigureAuditing(modelBuilder);
     }
 
     private static void ConfigureTours(ModelBuilder modelBuilder)
@@ -64,6 +66,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             entity.HasIndex(e => e.TourId);
             entity.HasIndex(e => e.Language);
             entity.HasIndex(e => new { e.TourId, e.Language }).IsUnique();
+            entity.HasIndex(e => new { e.Language, e.Slug });
             entity.HasOne(e => e.Tour)
                 .WithMany(t => t.Translations)
                 .HasForeignKey(e => e.TourId)
@@ -75,6 +78,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             entity.HasIndex(e => e.TourCategoryId);
             entity.HasIndex(e => e.Language);
             entity.HasIndex(e => new { e.TourCategoryId, e.Language }).IsUnique();
+            entity.HasIndex(e => new { e.Language, e.Slug });
             entity.HasOne(e => e.TourCategory)
                 .WithMany(c => c.Translations)
                 .HasForeignKey(e => e.TourCategoryId)
@@ -151,6 +155,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             entity.HasIndex(e => e.BlogPostId);
             entity.HasIndex(e => e.Language);
             entity.HasIndex(e => new { e.BlogPostId, e.Language }).IsUnique();
+            entity.HasIndex(e => new { e.Language, e.Slug });
             entity.HasOne(e => e.BlogPost)
                 .WithMany(p => p.Translations)
                 .HasForeignKey(e => e.BlogPostId)
@@ -168,6 +173,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             entity.HasIndex(e => e.BlogCategoryId);
             entity.HasIndex(e => e.Language);
             entity.HasIndex(e => new { e.BlogCategoryId, e.Language }).IsUnique();
+            entity.HasIndex(e => new { e.Language, e.Slug });
             entity.HasOne(e => e.BlogCategory)
                 .WithMany(c => c.Translations)
                 .HasForeignKey(e => e.BlogCategoryId)
@@ -257,6 +263,24 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             entity.HasOne(e => e.Department)
                 .WithMany()
                 .HasForeignKey(e => e.DepartmentId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+    }
+
+
+    private static void ConfigureAuditing(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AuditLog>(entity =>
+        {
+            entity.HasIndex(e => e.CreatedAtUtc);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.Area);
+            entity.HasIndex(e => e.HttpMethod);
+            entity.HasIndex(e => e.StatusCode);
+            entity.HasIndex(e => e.Succeeded);
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
     }
