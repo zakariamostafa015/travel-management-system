@@ -1,8 +1,15 @@
 using Microsoft.EntityFrameworkCore;
+using TravelToursWebsite.Application.Features.Auth;
 using TravelToursWebsite.Domain.Entities;
 using TravelToursWebsite.Domain.Enums;
 
 namespace TravelToursWebsite.Infrastructure.Persistence;
+
+public sealed record AdminSeedOptions(
+    string Username,
+    string Email,
+    string Password,
+    bool UpdatePassword = false);
 
 public static class DatabaseSeeder
 {
@@ -10,6 +17,75 @@ public static class DatabaseSeeder
     {
         await SeedLanguagesAsync(context, cancellationToken);
         await SeedSiteSettingsAsync(context, cancellationToken);
+    }
+
+    public static async Task SeedAsync(
+        ApplicationDbContext context,
+        IPasswordHasher passwordHasher,
+        AdminSeedOptions? adminOptions,
+        CancellationToken cancellationToken = default)
+    {
+        await SeedAsync(context, cancellationToken);
+        await SeedAdminAsync(context, passwordHasher, adminOptions, cancellationToken);
+    }
+
+
+    private static async Task SeedAdminAsync(
+        ApplicationDbContext context,
+        IPasswordHasher passwordHasher,
+        AdminSeedOptions? adminOptions,
+        CancellationToken cancellationToken)
+    {
+        if (adminOptions is null
+            || string.IsNullOrWhiteSpace(adminOptions.Username)
+            || string.IsNullOrWhiteSpace(adminOptions.Email)
+            || string.IsNullOrWhiteSpace(adminOptions.Password))
+        {
+            return;
+        }
+
+        var username = adminOptions.Username.Trim();
+        var email = adminOptions.Email.Trim();
+        var existingAdmin = await context.Users
+            .FirstOrDefaultAsync(user => user.Username == username, cancellationToken);
+
+        if (existingAdmin is not null)
+        {
+            existingAdmin.Email = email;
+            existingAdmin.Role = UserRole.Admin;
+            existingAdmin.IsActive = true;
+            existingAdmin.EmailConfirmed = true;
+
+            if (adminOptions.UpdatePassword)
+            {
+                existingAdmin.PasswordHash = passwordHasher.HashPassword(adminOptions.Password);
+            }
+
+            await context.SaveChangesAsync(cancellationToken);
+            return;
+        }
+
+        var emailInUse = await context.Users.AnyAsync(user => user.Email == email, cancellationToken);
+        if (emailInUse)
+        {
+            return;
+        }
+
+        context.Users.Add(new User
+        {
+            Username = username,
+            Email = email,
+            PasswordHash = passwordHasher.HashPassword(adminOptions.Password),
+            FirstName = "System",
+            LastName = "Administrator",
+            Bio = "Seeded administrator account.",
+            Role = UserRole.Admin,
+            IsActive = true,
+            EmailConfirmed = true,
+            CreatedDate = DateTime.UtcNow
+        });
+
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     private static async Task SeedLanguagesAsync(ApplicationDbContext context, CancellationToken cancellationToken)
