@@ -1,14 +1,14 @@
 # Migration Tracker
 
-Last updated: 2026-07-02
+Last updated: 2026-07-03
 
 ## Resume Instructions
 
 Start every new context by reading this file and `migration-docs/migration-plan.md`.
 
-Current stop point: Phase 9 is complete. Review and push the contact and booking APIs before starting admin content APIs.
+Current stop point: Phase 10 is complete. Review and push the admin content APIs before starting admin operations APIs.
 
-Next phase to start only after Phase 9 is reviewed and pushed: Phase 10 - Admin content APIs.
+Next phase to start only after Phase 10 is reviewed and pushed: Phase 11 - Admin operations APIs.
 
 ## Phase Status
 
@@ -23,7 +23,7 @@ Next phase to start only after Phase 9 is reviewed and pushed: Phase 10 - Admin 
 | 7 | Media service | Done | 2026-07-01 | Added WebP image upload service, media contracts, protected media endpoints, static upload serving, ImageSharp 3.1.11 processing, `ImageUrl`/`ImageLocalPath` model fields, and a forward-only image metadata migration. |
 | 8 | Public content APIs | Done | 2026-07-02 | Added EF-backed public catalog services, public home/settings contracts, versioned read-only tours/blog/category/home/content endpoints, localized slug fallback, active/published filtering, pagination/search/sorting, and DI wiring. |
 | 9 | Contact and booking APIs | Done | 2026-07-02 | Added public inquiry/booking submission endpoints, protected admin list/detail/status/delete endpoints, EF-backed application services, booking total calculation, best-effort SMTP confirmation emails, and blank-safe email configuration. |
-| 10 | Admin content APIs | Not Started |  | Add admin tours/blog/categories/itineraries/spots/translations/images endpoints. |
+| 10 | Admin content APIs | Done | 2026-07-03 | Added protected admin tour/blog content controllers, EF-backed management service, admin content contracts, category safeguards, image association endpoints, itinerary/spot endpoints, and translation upsert/list endpoints. |
 | 11 | Admin operations APIs | Not Started |  | Add admin users/languages/departments/team/settings/content endpoints. |
 | 12 | Audit and hardening | Not Started |  | Add audit logs, secrets cleanup, logging, performance/index improvements. |
 | 13 | Final cleanup | Not Started |  | Final docs and migration checklist. |
@@ -255,5 +255,32 @@ Next phase to start only after Phase 9 is reviewed and pushed: Phase 10 - Admin 
 - Result: no copied legacy secret values found in source/config files.
 - Command: `Select-String -Path TravelToursWebsite.Api\appsettings*.json -Pattern '"SmtpPassword"\s*:\s*"[^\"]+"'`
 - Result: no non-empty SMTP password values found.
+- Command: parse `TravelToursWebsite.Api/appsettings.json` and `TravelToursWebsite.Api/appsettings.Development.json` as JSON.
+- Result: JSON parsed successfully.
+## Phase 10 Checklist
+
+- [x] Add admin content contracts for images, itineraries, spots, and translations.
+- [x] Implement `ITourManagementService` for tour and tour-category create/update/delete behavior.
+- [x] Implement `IBlogManagementService` for blog post and blog-category create/update/delete behavior.
+- [x] Add tour image add/update/delete endpoints.
+- [x] Add blog image add/update/delete endpoints.
+- [x] Add tour itinerary upsert/delete endpoints.
+- [x] Add tour spot upsert/delete endpoints.
+- [x] Add tour, tour category, itinerary, blog post, and blog category translation list/upsert endpoints.
+- [x] Protect admin content endpoints with the `ContentManager` policy.
+- [x] Wire admin content services into Infrastructure DI.
+- [x] Verify no old Core/Data namespace references were introduced.
+- [x] Verify no legacy production secrets were copied into `src` source/config files.
+- [x] Verify build.
+- [x] Mark Phase 10 as Done.
+
+## Phase 10 Verification
+
+- Command: `dotnet build TravelToursWebsite.Api.sln --no-restore -m:1`
+- Result: build succeeded with 0 warnings and 0 errors.
+- Command: `rg "TravelToursWebsite\.Core|TravelToursWebsite\.Data|TempModels" TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Api TravelToursWebsite.Domain`
+- Result: no matches.
+- Command: `rg "db28030|5c\+HoW6|sqdm hjfi|n3gpy70" TravelToursWebsite.Api TravelToursWebsite.Application TravelToursWebsite.Infrastructure TravelToursWebsite.Domain`
+- Result: no copied legacy secret values found in source/config files.
 - Command: parse `TravelToursWebsite.Api/appsettings.json` and `TravelToursWebsite.Api/appsettings.Development.json` as JSON.
 - Result: JSON parsed successfully.
