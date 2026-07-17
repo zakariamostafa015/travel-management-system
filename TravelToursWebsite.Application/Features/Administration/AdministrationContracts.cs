@@ -42,6 +42,8 @@ public sealed record UserDto(
     string? LastName,
     string? Bio,
     string? ProfileImagePath,
+    string? ProfileImageUrl,
+    string? ProfileImageLocalPath,
     UserRole Role,
     bool IsActive,
     bool EmailConfirmed,
@@ -54,6 +56,8 @@ public sealed record CreateUserRequest(
     string Password,
     string? FirstName,
     string? LastName,
+    string? ProfileImageUrl,
+    string? ProfileImageLocalPath,
     UserRole Role,
     bool IsActive);
 
@@ -65,6 +69,8 @@ public sealed record UpdateUserRequest(
     string? LastName,
     string? Bio,
     string? ProfileImagePath,
+    string? ProfileImageUrl,
+    string? ProfileImageLocalPath,
     UserRole Role,
     bool IsActive,
     bool EmailConfirmed);
@@ -227,6 +233,8 @@ public static class AdministrationMappingExtensions
             user.LastName,
             user.Bio,
             user.ProfileImagePath,
+            user.ProfileImageUrl,
+            user.ProfileImageLocalPath,
             user.Role,
             user.IsActive,
             user.EmailConfirmed,
@@ -337,6 +345,8 @@ public sealed class CreateUserRequestValidator : AbstractValidator<CreateUserReq
         RuleFor(request => request.Password).NotEmpty().MinimumLength(8).MaximumLength(128);
         RuleFor(request => request.FirstName).MaximumLength(100);
         RuleFor(request => request.LastName).MaximumLength(100);
+        RuleFor(request => request.ProfileImageUrl).MaximumLength(500);
+        RuleFor(request => request.ProfileImageLocalPath).MaximumLength(500);
     }
 }
 
@@ -349,8 +359,11 @@ public sealed class UpdateUserRequestValidator : AbstractValidator<UpdateUserReq
         RuleFor(request => request.Email).NotEmpty().EmailAddress().MaximumLength(200);
         RuleFor(request => request.FirstName).MaximumLength(100);
         RuleFor(request => request.LastName).MaximumLength(100);
+        RuleFor(request => request.ProfileImageUrl).MaximumLength(500);
+        RuleFor(request => request.ProfileImageLocalPath).MaximumLength(500);
         RuleFor(request => request.Bio).MaximumLength(200);
-        RuleFor(request => request.ProfileImagePath).MaximumLength(500);
+        RuleFor(request => request.ProfileImageUrl).MaximumLength(500);
+        RuleFor(request => request.ProfileImageLocalPath).MaximumLength(500);
     }
 }
 

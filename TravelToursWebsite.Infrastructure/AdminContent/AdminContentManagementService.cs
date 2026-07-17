@@ -156,11 +156,11 @@ public sealed class AdminContentManagementService(ApplicationDbContext context)
         var image = new TourImage
         {
             TourId = request.TourId,
-            ImagePath = request.ImagePath,
+            ImagePath = request.ImageUrl,
             ImageUrl = NormalizeOptional(request.ImageUrl),
             ImageLocalPath = NormalizeOptional(request.ImageLocalPath),
             ThumbnailPath = NormalizeOptional(request.ThumbnailPath),
-            MediumPath = NormalizeOptional(request.MediumPath),
+            MediumPath = null,
             AltText = NormalizeOptional(request.AltText),
             Caption = NormalizeOptional(request.Caption),
             SortOrder = request.SortOrder,
@@ -186,11 +186,6 @@ public sealed class AdminContentManagementService(ApplicationDbContext context)
             await ClearMainTourImagesAsync(image.TourId, cancellationToken, image.Id);
         }
 
-        image.ImagePath = request.ImagePath;
-        image.ImageUrl = NormalizeOptional(request.ImageUrl);
-        image.ImageLocalPath = NormalizeOptional(request.ImageLocalPath);
-        image.ThumbnailPath = NormalizeOptional(request.ThumbnailPath);
-        image.MediumPath = NormalizeOptional(request.MediumPath);
         image.AltText = NormalizeOptional(request.AltText);
         image.Caption = NormalizeOptional(request.Caption);
         image.SortOrder = request.SortOrder;
@@ -458,11 +453,11 @@ public sealed class AdminContentManagementService(ApplicationDbContext context)
         var image = new BlogImage
         {
             BlogPostId = request.BlogPostId,
-            ImagePath = request.ImagePath,
+            ImagePath = request.ImageUrl,
             ImageUrl = NormalizeOptional(request.ImageUrl),
             ImageLocalPath = NormalizeOptional(request.ImageLocalPath),
             ThumbnailPath = NormalizeOptional(request.ThumbnailPath),
-            MediumPath = NormalizeOptional(request.MediumPath),
+            MediumPath = null,
             AltText = NormalizeOptional(request.AltText),
             Caption = NormalizeOptional(request.Caption),
             SortOrder = request.SortOrder,
@@ -482,11 +477,6 @@ public sealed class AdminContentManagementService(ApplicationDbContext context)
             return OperationResult<BlogImageDto>.Failure("Blog image was not found.");
         }
 
-        image.ImagePath = request.ImagePath;
-        image.ImageUrl = NormalizeOptional(request.ImageUrl);
-        image.ImageLocalPath = NormalizeOptional(request.ImageLocalPath);
-        image.ThumbnailPath = NormalizeOptional(request.ThumbnailPath);
-        image.MediumPath = NormalizeOptional(request.MediumPath);
         image.AltText = NormalizeOptional(request.AltText);
         image.Caption = NormalizeOptional(request.Caption);
         image.SortOrder = request.SortOrder;
@@ -931,3 +921,4 @@ public sealed class AdminContentManagementService(ApplicationDbContext context)
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 }
+

@@ -27,29 +27,26 @@ internal static class DatabaseInitializationExtensions
             {
                 if (!await MigrationHistoryHasRowsAsync(context))
                 {
-                    await EnsureMigrationHistoryBaselineAsync(context);
+                    await EnsureMigrationHistoryBaselineAsync(context, leaveLatestMigrationPending: true);
                 }
 
                 await context.Database.MigrateAsync();
             }
             else
             {
-                await context.Database.EnsureCreatedAsync();
-
-                if (!await BaseSchemaExistsAsync(context))
+                if (!recreateWhenSchemaMissing && await DatabaseHasAnyUserTablesAsync(context))
                 {
-                    if (!recreateWhenSchemaMissing)
-                    {
-                        throw new InvalidOperationException(
-                            "The database exists but the base TravelToursWebsite schema is missing. " +
-                            "Enable Database:RecreateWhenSchemaMissing for local Docker development, or restore/apply the initial schema manually.");
-                    }
-
-                    await context.Database.EnsureDeletedAsync();
-                    await context.Database.EnsureCreatedAsync();
+                    throw new InvalidOperationException(
+                        "The database exists but the base TravelToursWebsite schema is missing. " +
+                        "Enable Database:RecreateWhenSchemaMissing for local Docker development, or restore/apply the initial schema manually.");
                 }
 
-                await EnsureMigrationHistoryBaselineAsync(context);
+                if (recreateWhenSchemaMissing && await DatabaseHasAnyUserTablesAsync(context))
+                {
+                    await context.Database.EnsureDeletedAsync();
+                }
+
+                await context.Database.MigrateAsync();
             }
         }
 
@@ -68,6 +65,31 @@ internal static class DatabaseInitializationExtensions
         return await TableExistsAsync(context, "Languages");
     }
 
+    private static async Task<bool> DatabaseHasAnyUserTablesAsync(ApplicationDbContext context)
+    {
+        var connection = context.Database.GetDbConnection();
+        var shouldClose = connection.State == System.Data.ConnectionState.Closed;
+
+        if (shouldClose)
+        {
+            await connection.OpenAsync();
+        }
+
+        try
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = "SELECT COUNT(1) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME <> '__EFMigrationsHistory'";
+            var result = await command.ExecuteScalarAsync();
+            return Convert.ToInt32(result) > 0;
+        }
+        finally
+        {
+            if (shouldClose)
+            {
+                await connection.CloseAsync();
+            }
+        }
+    }
     private static async Task<bool> MigrationHistoryHasRowsAsync(ApplicationDbContext context)
     {
         if (!await TableExistsAsync(context, "__EFMigrationsHistory"))
@@ -129,9 +151,13 @@ internal static class DatabaseInitializationExtensions
         }
     }
 
-    private static async Task EnsureMigrationHistoryBaselineAsync(ApplicationDbContext context)
+    private static async Task EnsureMigrationHistoryBaselineAsync(ApplicationDbContext context, bool leaveLatestMigrationPending = false)
     {
         var migrations = context.Database.GetMigrations().ToArray();
+        if (leaveLatestMigrationPending && migrations.Length > 0)
+        {
+            migrations = migrations[..^1];
+        }
         if (migrations.Length == 0)
         {
             return;

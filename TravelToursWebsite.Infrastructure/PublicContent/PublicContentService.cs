@@ -6,7 +6,7 @@ using TravelToursWebsite.Infrastructure.Persistence;
 
 namespace TravelToursWebsite.Infrastructure.PublicContent;
 
-public sealed class PublicContentService(ApplicationDbContext context) : IPublicHomeService, IPublicSettingsService
+public sealed class PublicContentService(ApplicationDbContext context) : IPublicHomeService, IPublicPageService, IPublicSettingsService
 {
     public async Task<HomeContentDto> GetHomeAsync(
         string language = "en",
@@ -22,6 +22,7 @@ public sealed class PublicContentService(ApplicationDbContext context) : IPublic
             .Include(tour => tour.Category)
                 .ThenInclude(category => category!.Translations)
             .Include(tour => tour.Translations)
+            .Include(tour => tour.Images)
             .Take(6)
             .ToListAsync(cancellationToken);
 
@@ -34,6 +35,7 @@ public sealed class PublicContentService(ApplicationDbContext context) : IPublic
                 .ThenInclude(category => category!.Translations)
             .Include(post => post.Author)
             .Include(post => post.Translations)
+            .Include(post => post.Images)
             .Take(3)
             .ToListAsync(cancellationToken);
 
@@ -46,6 +48,7 @@ public sealed class PublicContentService(ApplicationDbContext context) : IPublic
                 .ThenInclude(category => category!.Translations)
             .Include(post => post.Author)
             .Include(post => post.Translations)
+            .Include(post => post.Images)
             .Take(3)
             .ToListAsync(cancellationToken);
 
@@ -66,14 +69,40 @@ public sealed class PublicContentService(ApplicationDbContext context) : IPublic
             .ThenBy(setting => setting.Key)
             .ToListAsync(cancellationToken);
 
+        var experienceSections = await GetPageSectionsAsync("home", normalizedLanguage, cancellationToken);
+
         return new HomeContentDto(
             featuredTours.Select(tour => tour.ToSummaryDto(normalizedLanguage)).ToArray(),
             featuredPosts.Select(post => post.ToSummaryDto(normalizedLanguage)).ToArray(),
             featuredEvents.Select(post => post.ToSummaryDto(normalizedLanguage)).ToArray(),
             tourCategories.Select(category => category.ToDto(normalizedLanguage)).ToArray(),
-            settings.Select(setting => setting.ToPublicDto()).ToArray());
+            settings.Select(setting => setting.ToPublicDto()).ToArray(),
+            experienceSections);
     }
 
+    public async Task<IReadOnlyList<PublicPageSectionDto>> GetPageSectionsAsync(
+        string pageKey,
+        string language = "en",
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(pageKey))
+        {
+            return Array.Empty<PublicPageSectionDto>();
+        }
+
+        var normalizedPageKey = pageKey.Trim().ToLowerInvariant();
+        var normalizedLanguage = NormalizeLanguage(language);
+        var sections = await context.PublicPageSections
+            .AsNoTracking()
+            .Where(section => section.IsActive && section.PageKey == normalizedPageKey)
+            .OrderBy(section => section.SortOrder)
+            .ThenBy(section => section.Id)
+            .Include(section => section.Translations)
+            .Include(section => section.Items)
+            .ToListAsync(cancellationToken);
+
+        return sections.Select(section => section.ToPublicDto(normalizedLanguage)).ToArray();
+    }
     public async Task<IReadOnlyList<PublicSiteSettingDto>> GetSettingsAsync(
         string? category = null,
         CancellationToken cancellationToken = default)

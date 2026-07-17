@@ -84,6 +84,9 @@ public sealed class AdminOperationsService(ApplicationDbContext context, IPasswo
             PasswordHash = passwordHasher.HashPassword(request.Password),
             FirstName = NormalizeOptional(request.FirstName),
             LastName = NormalizeOptional(request.LastName),
+            ProfileImageUrl = NormalizeOptional(request.ProfileImageUrl),
+            ProfileImageLocalPath = NormalizeOptional(request.ProfileImageLocalPath),
+            ProfileImagePath = NormalizeOptional(request.ProfileImageUrl),
             Role = request.Role,
             IsActive = request.IsActive,
             EmailConfirmed = false,
@@ -121,7 +124,9 @@ public sealed class AdminOperationsService(ApplicationDbContext context, IPasswo
         user.FirstName = NormalizeOptional(request.FirstName);
         user.LastName = NormalizeOptional(request.LastName);
         user.Bio = NormalizeOptional(request.Bio);
-        user.ProfileImagePath = NormalizeOptional(request.ProfileImagePath);
+        user.ProfileImageUrl = NormalizeOptional(request.ProfileImageUrl);
+        user.ProfileImageLocalPath = NormalizeOptional(request.ProfileImageLocalPath);
+        user.ProfileImagePath = NormalizeOptional(request.ProfileImageUrl);
         user.Role = request.Role;
         user.IsActive = request.IsActive;
         user.EmailConfirmed = request.EmailConfirmed;
@@ -772,3 +777,4 @@ public sealed class AdminOperationsService(ApplicationDbContext context, IPasswo
     private static string NormalizeCode(string value) => value.Trim().ToLowerInvariant();
     private static string? NormalizeOptional(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }
+

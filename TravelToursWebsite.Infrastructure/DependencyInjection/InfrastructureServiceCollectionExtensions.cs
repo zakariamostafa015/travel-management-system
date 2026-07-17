@@ -46,8 +46,10 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IUserApplicationService>(provider => provider.GetRequiredService<AdminOperationsService>());
         services.AddScoped<ILanguageApplicationService>(provider => provider.GetRequiredService<AdminOperationsService>());
         services.AddScoped<IOperationsContentService>(provider => provider.GetRequiredService<AdminOperationsService>());
+        services.AddScoped<IPublicPageSectionManagementService, PublicPageSectionManagementService>();
         services.AddScoped<IResourceContentService, ResourceContentService>();
         services.AddScoped<IPublicHomeService, PublicContentService>();
+        services.AddScoped<IPublicPageService, PublicContentService>();
         services.AddScoped<IPublicSettingsService, PublicContentService>();
 
         if (string.IsNullOrWhiteSpace(connectionString))

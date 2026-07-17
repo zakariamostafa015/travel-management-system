@@ -1,10 +1,13 @@
 using System;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using TravelToursWebsite.Infrastructure.Persistence;
 
 #nullable disable
 
 namespace TravelToursWebsite.Infrastructure.Migrations;
 
+[DbContext(typeof(ApplicationDbContext))]
 [Migration("20260701000000_AddRefreshTokens")]
 public partial class AddRefreshTokens : Migration
 {

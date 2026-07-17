@@ -5,6 +5,7 @@ using TravelToursWebsite.Api.Common;
 using TravelToursWebsite.Application.Common;
 using TravelToursWebsite.Application.Features.AdminContent;
 using TravelToursWebsite.Application.Features.Blog;
+using TravelToursWebsite.Application.Features.Media;
 
 namespace TravelToursWebsite.Api.Controllers;
 
@@ -14,7 +15,8 @@ namespace TravelToursWebsite.Api.Controllers;
 [Route("api/v{version:apiVersion}/admin/blog")]
 public sealed class AdminBlogController(
     IBlogManagementService blogManagementService,
-    IAdminBlogContentService adminBlogContentService)
+    IAdminBlogContentService adminBlogContentService,
+    IMediaStorageService mediaStorageService)
     : ControllerBase
 {
     [HttpPost]
@@ -86,6 +88,58 @@ public sealed class AdminBlogController(
         return ToOkOrBadRequest(await adminBlogContentService.DeleteBlogImageAsync(id, cancellationToken));
     }
 
+
+    [HttpPost("{blogPostId:int}/images/upload")]
+    [RequestSizeLimit(50 * 1024 * 1024)]
+    public async Task<IActionResult> UploadImages(int blogPostId, [FromForm] List<IFormFile> files, CancellationToken cancellationToken)
+    {
+        if (files.Count == 0)
+        {
+            return BadRequest(ApiResponse<object>.Fail("At least one image file is required.", traceId: HttpContext.TraceIdentifier));
+        }
+
+        var images = new List<BlogImageDto>();
+        for (var index = 0; index < files.Count; index++)
+        {
+            var file = files[index];
+            if (file.Length <= 0)
+            {
+                return BadRequest(ApiResponse<object>.Fail("Image file is empty.", traceId: HttpContext.TraceIdentifier));
+            }
+
+            await using var stream = file.OpenReadStream();
+            var upload = await mediaStorageService.SaveImageAsync(new MediaUploadRequest(
+                stream,
+                file.FileName,
+                file.ContentType,
+                file.Length,
+                "blog",
+                GetRequestBaseUrl()), cancellationToken);
+
+            if (!upload.Succeeded || upload.Value is null)
+            {
+                return BadRequest(ApiResponse<object>.Fail(upload.Message ?? "Image upload failed.", traceId: HttpContext.TraceIdentifier));
+            }
+
+            var image = await adminBlogContentService.AddBlogImageAsync(new BlogImageRequest(
+                blogPostId,
+                upload.Value.ImageUrl,
+                upload.Value.ImageLocalPath,
+                upload.Value.ThumbnailLocalPath,
+                null,
+                null,
+                index), cancellationToken);
+
+            if (!image.Succeeded || image.Value is null)
+            {
+                return BadRequest(ApiResponse<object>.Fail(image.Message ?? "Image save failed.", traceId: HttpContext.TraceIdentifier));
+            }
+
+            images.Add(image.Value);
+        }
+
+        return Ok(ApiResponse<IReadOnlyList<BlogImageDto>>.Ok(images, "Blog images uploaded.", HttpContext.TraceIdentifier));
+    }
     [HttpGet("{id:int}/translations")]
     public async Task<IActionResult> GetPostTranslations(int id, CancellationToken cancellationToken)
     {
@@ -129,6 +183,8 @@ public sealed class AdminBlogController(
         return Ok(ApiResponse.Ok("Blog post view count incremented.", HttpContext.TraceIdentifier));
     }
 
+    private string GetRequestBaseUrl() => $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
     private IActionResult ToCreatedOrBadRequest<T>(OperationResult<T> result, string actionName)
     {
         if (!result.Succeeded || result.Value is null)
@@ -159,3 +215,4 @@ public sealed class AdminBlogController(
         return Ok(ApiResponse.Ok(result.Message, HttpContext.TraceIdentifier));
     }
 }
+

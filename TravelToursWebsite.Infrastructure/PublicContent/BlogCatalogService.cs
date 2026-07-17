@@ -49,6 +49,7 @@ public sealed class BlogCatalogService(ApplicationDbContext context) : IBlogCata
                 .ThenInclude(category => category!.Translations)
             .Include(post => post.Author)
             .Include(post => post.Translations)
+            .Include(post => post.Images)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);

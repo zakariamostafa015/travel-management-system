@@ -117,7 +117,9 @@ docker compose down
 docker compose down -v
 ```
 
-`docker compose down -v` deletes the SQL Server data volume, uploaded files volume, and resource-content volume. Use it only when you are comfortable losing local Docker data.
+Important: `docker compose down -v` deletes the SQL Server data volume, including the `TravelToursWebsite` database. Use it only when you want a fresh local database. The API startup can recreate and seed the local database again when `DATABASE_MIGRATE_ON_STARTUP=true`, `DATABASE_SEED_ON_STARTUP=true`, and `DATABASE_RECREATE_WHEN_SCHEMA_MISSING=true`.
+
+`docker compose down -v` also deletes the uploaded files volume and resource-content volume. Use it only when you are comfortable losing local Docker data.
 
 ## Volumes
 

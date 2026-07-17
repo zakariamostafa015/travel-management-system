@@ -1,9 +1,12 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using TravelToursWebsite.Infrastructure.Persistence;
 
 #nullable disable
 
 namespace TravelToursWebsite.Infrastructure.Migrations;
 
+[DbContext(typeof(ApplicationDbContext))]
 [Migration("20260701001000_AddImageUrlAndLocalPath")]
 public partial class AddImageUrlAndLocalPath : Migration
 {

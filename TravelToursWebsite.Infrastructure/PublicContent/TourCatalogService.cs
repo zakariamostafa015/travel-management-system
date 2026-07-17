@@ -48,6 +48,7 @@ public sealed class TourCatalogService(ApplicationDbContext context) : ITourCata
             .Include(tour => tour.Category)
                 .ThenInclude(category => category!.Translations)
             .Include(tour => tour.Translations)
+            .Include(tour => tour.Images)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);

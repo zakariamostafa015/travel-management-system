@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TravelToursWebsite.Api.Common;
 using TravelToursWebsite.Application.Common;
 using TravelToursWebsite.Application.Features.AdminContent;
+using TravelToursWebsite.Application.Features.Media;
 using TravelToursWebsite.Application.Features.Tours;
 
 namespace TravelToursWebsite.Api.Controllers;
@@ -14,7 +15,8 @@ namespace TravelToursWebsite.Api.Controllers;
 [Route("api/v{version:apiVersion}/admin/tours")]
 public sealed class AdminToursController(
     ITourManagementService tourManagementService,
-    IAdminTourContentService adminTourContentService)
+    IAdminTourContentService adminTourContentService,
+    IMediaStorageService mediaStorageService)
     : ControllerBase
 {
     [HttpPost]
@@ -86,6 +88,59 @@ public sealed class AdminToursController(
         return ToOkOrBadRequest(await adminTourContentService.DeleteTourImageAsync(id, cancellationToken));
     }
 
+
+    [HttpPost("{tourId:int}/images/upload")]
+    [RequestSizeLimit(50 * 1024 * 1024)]
+    public async Task<IActionResult> UploadImages(int tourId, [FromForm] List<IFormFile> files, CancellationToken cancellationToken)
+    {
+        if (files.Count == 0)
+        {
+            return BadRequest(ApiResponse<object>.Fail("At least one image file is required.", traceId: HttpContext.TraceIdentifier));
+        }
+
+        var images = new List<TourImageDto>();
+        for (var index = 0; index < files.Count; index++)
+        {
+            var file = files[index];
+            if (file.Length <= 0)
+            {
+                return BadRequest(ApiResponse<object>.Fail("Image file is empty.", traceId: HttpContext.TraceIdentifier));
+            }
+
+            await using var stream = file.OpenReadStream();
+            var upload = await mediaStorageService.SaveImageAsync(new MediaUploadRequest(
+                stream,
+                file.FileName,
+                file.ContentType,
+                file.Length,
+                "tours",
+                GetRequestBaseUrl()), cancellationToken);
+
+            if (!upload.Succeeded || upload.Value is null)
+            {
+                return BadRequest(ApiResponse<object>.Fail(upload.Message ?? "Image upload failed.", traceId: HttpContext.TraceIdentifier));
+            }
+
+            var image = await adminTourContentService.AddTourImageAsync(new TourImageRequest(
+                tourId,
+                upload.Value.ImageUrl,
+                upload.Value.ImageLocalPath,
+                upload.Value.ThumbnailLocalPath,
+                null,
+                null,
+                index,
+                false), cancellationToken);
+
+            if (!image.Succeeded || image.Value is null)
+            {
+                return BadRequest(ApiResponse<object>.Fail(image.Message ?? "Image save failed.", traceId: HttpContext.TraceIdentifier));
+            }
+
+            images.Add(image.Value);
+        }
+
+        return Ok(ApiResponse<IReadOnlyList<TourImageDto>>.Ok(images, "Tour images uploaded.", HttpContext.TraceIdentifier));
+    }
     [HttpPost("itineraries")]
     public async Task<IActionResult> UpsertItinerary([FromBody] UpsertTourItineraryRequest request, CancellationToken cancellationToken)
     {
@@ -164,6 +219,8 @@ public sealed class AdminToursController(
         return ToOkOrBadRequest(await adminTourContentService.UpsertItineraryTranslationAsync(request, cancellationToken));
     }
 
+    private string GetRequestBaseUrl() => $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
     private IActionResult ToCreatedOrBadRequest<T>(OperationResult<T> result, string actionName)
     {
         if (!result.Succeeded || result.Value is null)
@@ -194,3 +251,4 @@ public sealed class AdminToursController(
         return Ok(ApiResponse.Ok(result.Message, HttpContext.TraceIdentifier));
     }
 }
+

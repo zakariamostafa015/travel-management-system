@@ -33,7 +33,8 @@ public sealed record BlogPostSummaryDto(
     int CategoryId,
     string? CategoryName,
     int AuthorId,
-    string? AuthorName);
+    string? AuthorName,
+    IReadOnlyList<BlogImageDto> Images);
 
 public sealed record BlogPostDetailsDto(
     int Id,
@@ -148,6 +149,21 @@ public interface IBlogManagementService
 
 public static class BlogMappingExtensions
 {
+    private static string? ResolveBlogImage(BlogPost post)
+    {
+        if (!string.IsNullOrWhiteSpace(post.FeaturedImagePath))
+        {
+            return post.FeaturedImagePath;
+        }
+
+        var image = post.Images
+            .OrderBy(item => item.SortOrder)
+            .ThenBy(item => item.Id)
+            .FirstOrDefault();
+
+        return image?.ImageUrl ?? image?.ImagePath;
+    }
+
     public static BlogPostSummaryDto ToSummaryDto(this BlogPost post, string language = "en")
     {
         var translation = post.Translations.FindBestTranslation(language);
@@ -158,7 +174,7 @@ public static class BlogMappingExtensions
             translation?.Title ?? string.Empty,
             translation?.Slug,
             translation?.Excerpt ?? string.Empty,
-            post.FeaturedImagePath,
+            ResolveBlogImage(post),
             post.IsPublished,
             post.IsFeatured,
             post.IsEvent,
@@ -167,7 +183,8 @@ public static class BlogMappingExtensions
             post.CategoryId,
             categoryTranslation?.Name,
             post.AuthorId,
-            post.Author?.FullName());
+            post.Author?.FullName(),
+            post.Images.OrderBy(image => image.SortOrder).Select(image => image.ToDto()).ToArray());
     }
 
     public static BlogPostDetailsDto ToDetailsDto(this BlogPost post, string language = "en")
@@ -182,7 +199,7 @@ public static class BlogMappingExtensions
             translation?.Content ?? string.Empty,
             translation?.MetaDescription,
             translation?.MetaKeywords,
-            post.FeaturedImagePath,
+            ResolveBlogImage(post),
             post.IsPublished,
             post.IsFeatured,
             post.IsEvent,
