@@ -22,6 +22,9 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<BookingRequest> BookingRequests => Set<BookingRequest>();
     public DbSet<User> Users => Set<User>();
     public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
+    public DbSet<PublicPageSection> PublicPageSections => Set<PublicPageSection>();
+    public DbSet<PublicPageSectionTranslation> PublicPageSectionTranslations => Set<PublicPageSectionTranslation>();
+    public DbSet<PublicPageSectionItem> PublicPageSectionItems => Set<PublicPageSectionItem>();
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
     public DbSet<Language> Languages => Set<Language>();
     public DbSet<Department> Departments => Set<Department>();
@@ -36,6 +39,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         ConfigureTours(modelBuilder);
         ConfigureBlog(modelBuilder);
         ConfigureOperations(modelBuilder);
+        ConfigurePublicPages(modelBuilder);
         ConfigureAuditing(modelBuilder);
     }
 
@@ -199,6 +203,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             entity.HasIndex(e => e.Username).IsUnique();
             entity.HasIndex(e => e.Email).IsUnique();
             entity.HasIndex(e => e.IsActive);
+            entity.Property(e => e.ProfileImageUrl).HasMaxLength(500);
+            entity.Property(e => e.ProfileImageLocalPath).HasMaxLength(500);
         });
 
         modelBuilder.Entity<SiteSettings>(entity =>
@@ -268,6 +274,69 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     }
 
 
+    private static void ConfigurePublicPages(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<PublicPageSection>(entity =>
+        {
+            entity.HasIndex(e => e.PageKey);
+            entity.HasIndex(e => e.SectionKey);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.SortOrder);
+            entity.HasIndex(e => new { e.PageKey, e.SectionKey }).IsUnique();
+            entity.Property(e => e.PageKey).HasMaxLength(100);
+            entity.Property(e => e.SectionKey).HasMaxLength(100);
+            entity.Property(e => e.LayoutVariant).HasMaxLength(80);
+            entity.Property(e => e.Theme).HasMaxLength(80);
+            entity.Property(e => e.DesktopMediaUrl).HasMaxLength(500);
+            entity.Property(e => e.MobileMediaUrl).HasMaxLength(500);
+            entity.Property(e => e.MediaAlt).HasMaxLength(300);
+            entity.Property(e => e.CtaLabel).HasMaxLength(120);
+            entity.Property(e => e.CtaUrl).HasMaxLength(500);
+            entity.HasOne(e => e.LinkedTour)
+                .WithMany()
+                .HasForeignKey(e => e.LinkedTourId)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(e => e.LinkedTourCategory)
+                .WithMany()
+                .HasForeignKey(e => e.LinkedTourCategoryId)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(e => e.LinkedBlogPost)
+                .WithMany()
+                .HasForeignKey(e => e.LinkedBlogPostId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<PublicPageSectionTranslation>(entity =>
+        {
+            entity.HasIndex(e => e.PublicPageSectionId);
+            entity.HasIndex(e => e.Language);
+            entity.HasIndex(e => new { e.PublicPageSectionId, e.Language }).IsUnique();
+            entity.Property(e => e.Language).HasMaxLength(10);
+            entity.Property(e => e.Eyebrow).HasMaxLength(160);
+            entity.Property(e => e.Title).HasMaxLength(240);
+            entity.Property(e => e.Subtitle).HasMaxLength(300);
+            entity.HasOne(e => e.PublicPageSection)
+                .WithMany(e => e.Translations)
+                .HasForeignKey(e => e.PublicPageSectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PublicPageSectionItem>(entity =>
+        {
+            entity.HasIndex(e => e.PublicPageSectionId);
+            entity.HasIndex(e => e.SortOrder);
+            entity.Property(e => e.ItemKey).HasMaxLength(100);
+            entity.Property(e => e.Label).HasMaxLength(160);
+            entity.Property(e => e.Value).HasMaxLength(160);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Url).HasMaxLength(500);
+            entity.Property(e => e.IconClass).HasMaxLength(80);
+            entity.HasOne(e => e.PublicPageSection)
+                .WithMany(e => e.Items)
+                .HasForeignKey(e => e.PublicPageSectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
     private static void ConfigureAuditing(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AuditLog>(entity =>
@@ -285,3 +354,4 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         });
     }
 }
+

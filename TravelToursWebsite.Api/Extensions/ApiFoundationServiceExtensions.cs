@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.OpenApi.Models;
 using System.Threading.RateLimiting;
 using TravelToursWebsite.Api.Common;
 using TravelToursWebsite.Api.ExceptionHandling;
@@ -41,7 +42,31 @@ internal static class ApiFoundationServiceExtensions
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(c =>
+        {
+            c.AddSecurityDefinition("Authorization", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header. Enter the full value: Bearer {your access token}.",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey
+            });
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Authorization"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
         services.ConfigureOptions<ConfigureSwaggerOptions>();
         services.AddHealthChecks();
         services.AddConfiguredCors(configuration);

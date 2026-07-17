@@ -35,6 +35,7 @@ public sealed class MediaController(IMediaStorageService mediaStorageService) : 
             file.ContentType,
             file.Length,
             folderName,
+            GetRequestBaseUrl(),
             altText,
             caption);
 
@@ -46,6 +47,8 @@ public sealed class MediaController(IMediaStorageService mediaStorageService) : 
 
         return Ok(ApiResponse<MediaAssetDto>.Ok(result.Value, "Image uploaded.", HttpContext.TraceIdentifier));
     }
+
+    private string GetRequestBaseUrl() => $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
 
     [HttpDelete("images")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]

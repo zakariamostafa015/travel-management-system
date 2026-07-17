@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
@@ -57,7 +57,6 @@ public sealed class WebPImageStorageService(
 
         using (image)
         {
-            image.Metadata.ExifProfile = null;
             ResizeToFit(image, _options.MaxWidth, _options.MaxHeight, ResizeMode.Max);
 
             var fileName = $"{Guid.NewGuid():N}.webp";
@@ -79,11 +78,11 @@ public sealed class WebPImageStorageService(
                 fileInfo.Length,
                 image.Width,
                 image.Height,
-                GetPublicUrl(localPath),
+                GetPublicUrl(localPath, request.PublicBaseUrl),
                 localPath,
-                GetPublicUrl(thumbnail.LocalPath),
+                GetPublicUrl(thumbnail.LocalPath, request.PublicBaseUrl),
                 thumbnail.LocalPath,
-                GetPublicUrl(medium.LocalPath),
+                GetPublicUrl(medium.LocalPath, request.PublicBaseUrl),
                 medium.LocalPath,
                 request.AltText,
                 request.Caption);
@@ -122,6 +121,11 @@ public sealed class WebPImageStorageService(
 
     public string GetPublicUrl(string imageLocalPath)
     {
+        return GetPublicUrl(imageLocalPath, null);
+    }
+
+    private string GetPublicUrl(string imageLocalPath, string? requestBaseUrl)
+    {
         if (string.IsNullOrWhiteSpace(imageLocalPath))
         {
             return string.Empty;
@@ -134,7 +138,15 @@ public sealed class WebPImageStorageService(
             normalized = normalized[(uploadsRoot.Length + 1)..];
         }
 
-        return $"{_options.PublicBasePath.TrimEnd('/')}/{normalized}";
+        var publicPath = $"{_options.PublicBasePath.TrimEnd('/')}/{normalized}";
+        var configuredBaseUrl = NormalizeBaseUrl(_options.PublicBaseUrl);
+        var baseUrl = configuredBaseUrl ?? NormalizeBaseUrl(requestBaseUrl);
+        return baseUrl is null ? publicPath : $"{baseUrl}{publicPath}";
+    }
+
+    private static string? NormalizeBaseUrl(string? baseUrl)
+    {
+        return string.IsNullOrWhiteSpace(baseUrl) ? null : baseUrl.Trim().TrimEnd('/');
     }
 
     private async Task<(string LocalPath, string FullPath)> SaveVariantAsync(
@@ -224,3 +236,4 @@ public sealed class WebPImageStorageService(
         }
     }
 }
+

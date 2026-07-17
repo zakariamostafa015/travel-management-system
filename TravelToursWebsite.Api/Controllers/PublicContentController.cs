@@ -12,6 +12,7 @@ namespace TravelToursWebsite.Api.Controllers;
 [Route("api/v{version:apiVersion}")]
 public sealed class PublicContentController(
     IPublicHomeService publicHomeService,
+    IPublicPageService publicPageService,
     IPublicSettingsService publicSettingsService)
     : ControllerBase
 {
@@ -25,6 +26,16 @@ public sealed class PublicContentController(
         return Ok(ApiResponse<HomeContentDto>.Ok(content, traceId: HttpContext.TraceIdentifier));
     }
 
+    [HttpGet("content/pages/{pageKey}")]
+    [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<PublicPageSectionDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPageSections(
+        string pageKey,
+        [FromQuery] string language = "en",
+        CancellationToken cancellationToken = default)
+    {
+        var sections = await publicPageService.GetPageSectionsAsync(pageKey, language, cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<PublicPageSectionDto>>.Ok(sections, traceId: HttpContext.TraceIdentifier));
+    }
     [HttpGet("content/settings")]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<PublicSiteSettingDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSettings(

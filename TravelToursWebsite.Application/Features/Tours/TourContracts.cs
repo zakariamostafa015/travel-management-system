@@ -29,6 +29,7 @@ public sealed record TourSummaryDto(
     string? DurationText,
     bool IsPackage,
     string? FeaturedImagePath,
+    IReadOnlyList<TourImageDto> Images,
     bool IsActive,
     bool IsFeatured,
     int SortOrder,
@@ -174,7 +175,21 @@ public interface ITourManagementService
 
 public static class TourMappingExtensions
 {
-    public static TourSummaryDto ToSummaryDto(this Tour tour, string language = "en")
+    private static string? ResolveTourImage(Tour tour)
+    {
+        if (!string.IsNullOrWhiteSpace(tour.FeaturedImagePath))
+        {
+            return tour.FeaturedImagePath;
+        }
+
+        var image = tour.Images
+            .OrderByDescending(item => item.IsMainImage)
+            .ThenBy(item => item.SortOrder)
+            .ThenBy(item => item.Id)
+            .FirstOrDefault();
+
+        return image?.ImageUrl ?? image?.ImagePath;
+    }    public static TourSummaryDto ToSummaryDto(this Tour tour, string language = "en")
     {
         var translation = tour.Translations.FindBestTranslation(language);
         var categoryTranslation = tour.Category?.Translations.FindBestTranslation(language);
@@ -188,7 +203,8 @@ public static class TourMappingExtensions
             tour.Duration,
             tour.DurationText,
             tour.IsPackage,
-            tour.FeaturedImagePath,
+            ResolveTourImage(tour),
+            tour.Images.OrderBy(image => image.SortOrder).ThenBy(image => image.Id).Select(image => image.ToDto()).ToArray(),
             tour.IsActive,
             tour.IsFeatured,
             tour.SortOrder,
@@ -212,7 +228,7 @@ public static class TourMappingExtensions
             translation?.DurationUnit,
             translation?.ActivityHighlights,
             tour.IsPackage,
-            tour.FeaturedImagePath,
+            ResolveTourImage(tour),
             tour.IsActive,
             tour.IsFeatured,
             tour.SortOrder,

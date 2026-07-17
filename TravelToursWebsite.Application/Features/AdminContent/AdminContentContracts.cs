@@ -63,11 +63,9 @@ public sealed record UpsertBlogCategoryTranslationRequest(int BlogCategoryId, Bl
 
 public sealed record TourImageRequest(
     int TourId,
-    string ImagePath,
-    string? ImageUrl,
-    string? ImageLocalPath,
+    string ImageUrl,
+    string ImageLocalPath,
     string? ThumbnailPath,
-    string? MediumPath,
     string? AltText,
     string? Caption,
     int SortOrder,
@@ -75,11 +73,6 @@ public sealed record TourImageRequest(
 
 public sealed record UpdateTourImageRequest(
     int Id,
-    string ImagePath,
-    string? ImageUrl,
-    string? ImageLocalPath,
-    string? ThumbnailPath,
-    string? MediumPath,
     string? AltText,
     string? Caption,
     int SortOrder,
@@ -87,22 +80,15 @@ public sealed record UpdateTourImageRequest(
 
 public sealed record BlogImageRequest(
     int BlogPostId,
-    string ImagePath,
-    string? ImageUrl,
-    string? ImageLocalPath,
+    string ImageUrl,
+    string ImageLocalPath,
     string? ThumbnailPath,
-    string? MediumPath,
     string? AltText,
     string? Caption,
     int SortOrder);
 
 public sealed record UpdateBlogImageRequest(
     int Id,
-    string ImagePath,
-    string? ImageUrl,
-    string? ImageLocalPath,
-    string? ThumbnailPath,
-    string? MediumPath,
     string? AltText,
     string? Caption,
     int SortOrder);
@@ -164,11 +150,9 @@ public sealed class TourImageRequestValidator : AbstractValidator<TourImageReque
     public TourImageRequestValidator()
     {
         RuleFor(request => request.TourId).GreaterThan(0);
-        RuleFor(request => request.ImagePath).NotEmpty().MaximumLength(500);
-        RuleFor(request => request.ImageUrl).MaximumLength(500);
-        RuleFor(request => request.ImageLocalPath).MaximumLength(500);
+        RuleFor(request => request.ImageUrl).NotEmpty().MaximumLength(500);
+        RuleFor(request => request.ImageLocalPath).NotEmpty().MaximumLength(500);
         RuleFor(request => request.ThumbnailPath).MaximumLength(500);
-        RuleFor(request => request.MediumPath).MaximumLength(500);
         RuleFor(request => request.AltText).MaximumLength(200);
         RuleFor(request => request.Caption).MaximumLength(200);
     }
@@ -179,11 +163,6 @@ public sealed class UpdateTourImageRequestValidator : AbstractValidator<UpdateTo
     public UpdateTourImageRequestValidator()
     {
         RuleFor(request => request.Id).GreaterThan(0);
-        RuleFor(request => request.ImagePath).NotEmpty().MaximumLength(500);
-        RuleFor(request => request.ImageUrl).MaximumLength(500);
-        RuleFor(request => request.ImageLocalPath).MaximumLength(500);
-        RuleFor(request => request.ThumbnailPath).MaximumLength(500);
-        RuleFor(request => request.MediumPath).MaximumLength(500);
         RuleFor(request => request.AltText).MaximumLength(200);
         RuleFor(request => request.Caption).MaximumLength(200);
     }
@@ -194,11 +173,9 @@ public sealed class BlogImageRequestValidator : AbstractValidator<BlogImageReque
     public BlogImageRequestValidator()
     {
         RuleFor(request => request.BlogPostId).GreaterThan(0);
-        RuleFor(request => request.ImagePath).NotEmpty().MaximumLength(500);
-        RuleFor(request => request.ImageUrl).MaximumLength(500);
-        RuleFor(request => request.ImageLocalPath).MaximumLength(500);
+        RuleFor(request => request.ImageUrl).NotEmpty().MaximumLength(500);
+        RuleFor(request => request.ImageLocalPath).NotEmpty().MaximumLength(500);
         RuleFor(request => request.ThumbnailPath).MaximumLength(500);
-        RuleFor(request => request.MediumPath).MaximumLength(500);
         RuleFor(request => request.AltText).MaximumLength(200);
         RuleFor(request => request.Caption).MaximumLength(200);
     }
@@ -209,11 +186,6 @@ public sealed class UpdateBlogImageRequestValidator : AbstractValidator<UpdateBl
     public UpdateBlogImageRequestValidator()
     {
         RuleFor(request => request.Id).GreaterThan(0);
-        RuleFor(request => request.ImagePath).NotEmpty().MaximumLength(500);
-        RuleFor(request => request.ImageUrl).MaximumLength(500);
-        RuleFor(request => request.ImageLocalPath).MaximumLength(500);
-        RuleFor(request => request.ThumbnailPath).MaximumLength(500);
-        RuleFor(request => request.MediumPath).MaximumLength(500);
         RuleFor(request => request.AltText).MaximumLength(200);
         RuleFor(request => request.Caption).MaximumLength(200);
     }
@@ -257,3 +229,4 @@ public sealed class UpsertTourSpotRequestValidator : AbstractValidator<UpsertTou
         RuleFor(request => request.Description).MaximumLength(1000);
     }
 }
+

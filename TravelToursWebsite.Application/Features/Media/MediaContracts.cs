@@ -17,6 +17,7 @@ public sealed class MediaOptions
     public int MediumHeight { get; set; } = 600;
     public string UploadRootFolder { get; set; } = "uploads";
     public string PublicBasePath { get; set; } = "/uploads";
+    public string? PublicBaseUrl { get; set; }
     public string[] AllowedExtensions { get; set; } = [".jpg", ".jpeg", ".png", ".webp"];
     public string[] AllowedContentTypes { get; set; } = ["image/jpeg", "image/png", "image/webp"];
 }
@@ -27,6 +28,7 @@ public sealed record MediaUploadRequest(
     string? ContentType,
     long Length,
     string FolderName,
+    string? PublicBaseUrl = null,
     string? AltText = null,
     string? Caption = null);
 
@@ -67,3 +69,5 @@ public sealed class MediaUploadRequestValidator : AbstractValidator<MediaUploadR
         RuleFor(request => request.Caption).MaximumLength(200);
     }
 }
+
+

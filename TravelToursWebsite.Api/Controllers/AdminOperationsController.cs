@@ -14,6 +14,7 @@ namespace TravelToursWebsite.Api.Controllers;
 public sealed class AdminOperationsController(
     ILanguageApplicationService languageService,
     IOperationsContentService operationsContentService,
+    IPublicPageSectionManagementService publicPageSectionService,
     IResourceContentService resourceContentService)
     : ControllerBase
 {
@@ -130,6 +131,33 @@ public sealed class AdminOperationsController(
         return ToOkOrBadRequest(await operationsContentService.DeleteSiteSettingsAsync(id, cancellationToken));
     }
 
+    [HttpGet("public-page-sections")]
+    public async Task<IActionResult> GetPublicPageSections([FromQuery] PublicPageSectionQuery query, CancellationToken cancellationToken)
+    {
+        var result = await publicPageSectionService.GetSectionsAsync(query, cancellationToken);
+        return Ok(ApiResponse<PagedResult<AdminPublicPageSectionDto>>.Ok(result, traceId: HttpContext.TraceIdentifier));
+    }
+
+    [HttpGet("public-page-sections/{id:int}")]
+    public async Task<IActionResult> GetPublicPageSectionById(int id, CancellationToken cancellationToken)
+    {
+        var result = await publicPageSectionService.GetSectionByIdAsync(id, cancellationToken);
+        return result is null
+            ? NotFound(ApiResponse<object>.Fail("Public page section was not found.", traceId: HttpContext.TraceIdentifier))
+            : Ok(ApiResponse<AdminPublicPageSectionDto>.Ok(result, traceId: HttpContext.TraceIdentifier));
+    }
+
+    [HttpPut("public-page-sections")]
+    public async Task<IActionResult> UpsertPublicPageSection([FromBody] UpsertPublicPageSectionRequest request, CancellationToken cancellationToken)
+    {
+        return ToOkOrBadRequest(await publicPageSectionService.UpsertSectionAsync(request, cancellationToken));
+    }
+
+    [HttpDelete("public-page-sections/{id:int}")]
+    public async Task<IActionResult> DeletePublicPageSection(int id, CancellationToken cancellationToken)
+    {
+        return ToOkOrBadRequest(await publicPageSectionService.DeleteSectionAsync(id, cancellationToken));
+    }
     [HttpGet("resources/languages")]
     public async Task<IActionResult> GetResourceLanguages(CancellationToken cancellationToken)
     {

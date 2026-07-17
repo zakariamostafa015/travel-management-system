@@ -31,6 +31,12 @@ public class User
     [StringLength(500)]
     public string? ProfileImagePath { get; set; }
 
+    [StringLength(500)]
+    public string? ProfileImageUrl { get; set; }
+
+    [StringLength(500)]
+    public string? ProfileImageLocalPath { get; set; }
+
     public UserRole Role { get; set; } = UserRole.Admin;
     public bool IsActive { get; set; } = true;
     public bool EmailConfirmed { get; set; }
@@ -40,3 +46,4 @@ public class User
     public ICollection<BlogPost> BlogPosts { get; set; } = new List<BlogPost>();
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }
+
